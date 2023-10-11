@@ -14,11 +14,11 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Arrays;
 
-// Declaring a WebServlet called SingleStarServlet, which maps to url "/api/single-star"
-@WebServlet(name = "SingleStarServlet", urlPatterns = "/api/single-star")
-public class SingleStarServlet extends HttpServlet {
-    private static final long serialVersionUID = 2L;
+@WebServlet(name = "MovieListServlet", urlPatterns = "/api/movie-list")
+public class MovieListServlet extends HttpServlet {
+    private static final long serialVersionUID = 3L;
 
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
@@ -40,10 +40,10 @@ public class SingleStarServlet extends HttpServlet {
         response.setContentType("application/json"); // Response mime type
 
         // Retrieve parameter id from url request.
-        String id = request.getParameter("id");
+//        String id = request.getParameter("id");
 
         // The log message can be found in localhost log
-        request.getServletContext().log("getting id: " + id);
+//        request.getServletContext().log("getting id: " + id);
 
         // Output stream to STDOUT
         PrintWriter out = response.getWriter();
@@ -53,15 +53,15 @@ public class SingleStarServlet extends HttpServlet {
             // Get a connection from dataSource
 
             // Construct a query with parameter represented by "?"
-            String query = "SELECT * from stars as s, stars_in_movies as sim, movies as m " +
-                    "where m.id = sim.movieId and sim.starId = s.id and s.id = ?";
-
-            // Declare our statement
+            String query = " SELECT     sub.MovieId,     sub.MovieTitle,     sub.MovieYear,     sub.Director,     sub.Genres,     sub.Stars,     r.rating AS Rating FROM (     SELECT         m.id AS MovieId,         m.title AS MovieTitle,         m.year AS MovieYear,         m.director AS Director,         (SELECT GROUP_CONCAT(CONCAT(names,\"|\", ids)) FROM (SELECT DISTINCT g.name AS names, g.id as ids          FROM genres_in_movies gim          \n" +
+                    "JOIN genres g ON gim.genreId = g.id          WHERE gim.movieId = m.id          LIMIT 3) AS SubGenres) AS Genres,       ( SELECT GROUP_CONCAT(CONCAT(names,\"|\",ids)) FROM ( SELECT DISTINCT s.name AS names, s.id as ids\n" +
+                    "       FROM stars_in_movies  sim        JOIN stars s ON sim.starId = s.id         WHERE sim.movieId = m.id         LIMIT 3) AS SubStars) AS Stars     FROM movies m ) AS sub JOIN ratings r ON sub.MovieId = r.movieId\n" +
+                    " ORDER BY r.rating DESC LIMIT 20;";
             PreparedStatement statement = conn.prepareStatement(query);
 
             // Set the parameter represented by "?" in the query to the id we get from url,
             // num 1 indicates the first "?" in the query
-            statement.setString(1, id);
+//            statement.setString(1, id);
 
             // Perform the query
             ResultSet rs = statement.executeQuery();
@@ -71,25 +71,43 @@ public class SingleStarServlet extends HttpServlet {
             // Iterate through each row of rs
             while (rs.next()) {
 
-                String starId = rs.getString("starId");
-                String starName = rs.getString("name");
-                String starDob = rs.getString("birthYear");
+                String movieId = rs.getString("MovieId");
+                String movieTitle = rs.getString("MovieTitle");
+                String movieYear = rs.getString("MovieYear");
 
-                String movieId = rs.getString("movieId");
-                String movieTitle = rs.getString("title");
-                String movieYear = rs.getString("year");
-                String movieDirector = rs.getString("director");
+                String director = rs.getString("Director");
+                String genres = rs.getString("Genres");
+                String stars = rs.getString("Stars");
+
+
+                String rating = rs.getString("Rating");
 
                 // Create a JsonObject based on the data we retrieve from rs
 
                 JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("star_id", starId);
-                jsonObject.addProperty("star_name", starName);
-                jsonObject.addProperty("star_dob", starDob);
-                jsonObject.addProperty("movie_id", movieId);
-                jsonObject.addProperty("movie_title", movieTitle);
-                jsonObject.addProperty("movie_year", movieYear);
-                jsonObject.addProperty("movie_director", movieDirector);
+                jsonObject.addProperty("movie_Id", movieId);
+                jsonObject.addProperty("movie_Title", movieTitle);
+                jsonObject.addProperty("movie_Year", movieYear);
+                jsonObject.addProperty("director", director);
+                jsonObject.addProperty("genres", genres);
+                JsonArray starsJsonArray = new JsonArray();
+
+//                jsonObject.addP("stars", actorObject);
+
+                String[] actors = stars.split(",");
+                // Iterate through the list and split each string
+                for (String actor : actors) {
+                    JsonObject actorObject = new JsonObject();
+                    String[] parts = actor.split("\\|");
+                    String name = parts[0];
+                    String id = parts[1];
+                    actorObject.addProperty("name", name);
+                    actorObject.addProperty("id", id);
+                    starsJsonArray.add(actorObject);
+                }
+                jsonObject.add("stars", starsJsonArray);
+
+                jsonObject.addProperty("rating", rating);
 
                 jsonArray.add(jsonObject);
             }
