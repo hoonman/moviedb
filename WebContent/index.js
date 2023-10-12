@@ -56,8 +56,8 @@ function handleResult(resultData) {
     let movieTableBodyElement = jQuery("#movie_table_body");
     console.log(resultData)
 
-    console.log(resultData[0]["stars"])
-    console.log(resultData[1]["stars"].length)
+    console.log(resultData[0]["genres"])
+    console.log(resultData[1]["genres"].length)
     // Concatenate the html tags with resultData jsonObject to create table rows
     for (let i = 0; i < Math.min(20, resultData.length); i++) {
         let rowHTML = "";
@@ -65,12 +65,16 @@ function handleResult(resultData) {
         rowHTML += "<th>" +'<a href="single-movie.html?id=' + resultData[i]['movie_Id'] + '">' +  resultData[i]["movie_Title"] +"</a>"+ "</th>";
         rowHTML += "<th>" + resultData[i]["movie_Year"] + "</th>";
         rowHTML += "<th>" + resultData[i]["director"] + "</th>";
-        rowHTML += "<th>" + resultData[i]["genres"] + "</th>";
+        rowHTML += "<th>";
+
+        for(let j = 0; j< resultData[i]["genres"].length; j++){
+            rowHTML +=  resultData[i]["genres"][j]["name"] +" ";
+        }
+        rowHTML += "</th>";
+
         rowHTML += "<th>";
 
         for(let j = 0; j< resultData[i]["stars"].length; j++){
-            console.log(resultData[i]["stars"][j]["id"])
-            console.log(resultData[i]["stars"][j]["name"])
             rowHTML += '<a href ="single-star.html?id=' + resultData[i]["stars"][j]["id"] + '">' +  resultData[i]["stars"][j]["name"] +" "+"</a>";
         }
         rowHTML += "</th>";
