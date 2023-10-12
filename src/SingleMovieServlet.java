@@ -134,7 +134,21 @@ public class SingleMovieServlet extends HttpServlet {
                 jsonObject.addProperty("movie_Title", movieTitle);
                 jsonObject.addProperty("movie_Year", movieYear);
                 jsonObject.addProperty("director", director);
-                jsonObject.addProperty("genres", genres);
+//                jsonObject.addProperty("genres", genres);
+                JsonArray genreJsonArray = new JsonArray();
+                String[] genres_split = genres.split(",");
+                // Iterate through the list and split each string
+                for (String genre : genres_split) {
+                    JsonObject genreObject = new JsonObject();
+                    String[] parts = genre.split("\\|");
+                    String name = parts[0];
+                    String id = parts[1];
+                    genreObject.addProperty("name", name);
+                    genreObject.addProperty("id", id);
+                    genreJsonArray.add(genreObject);
+                }
+                jsonObject.add("genres", genreJsonArray);
+
                 JsonArray starsJsonArray = new JsonArray();
 
 //                jsonObject.addP("stars", actorObject);

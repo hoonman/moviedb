@@ -55,7 +55,12 @@ function handleResult(resultData) {
     // rowHTML += "<th>" +'<a href="single-movie.html?id=' + resultData[0]['movie_Id'] + '">' +  resultData[0]["movie_Title"] +"</a>"+ "</th>";
     rowHTML += "<th>" + resultData[0]["movie_Year"] + "</th>";
     rowHTML += "<th>" + resultData[0]["director"] + "</th>";
-    rowHTML += "<th>" + resultData[0]["genres"] + "</th>";
+    rowHTML += "<th>";
+
+    for(let j = 0; j< resultData[0]["genres"].length; j++){
+        rowHTML +=  resultData[0]["genres"][j]["name"] +" ";
+    }
+    rowHTML += "</th>";
     rowHTML += "<th>";
     for(let j = 0; j< resultData[0]["stars"].length; j++){
         if (j == resultData[0]["stars"].length - 1) {
