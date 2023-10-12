@@ -56,7 +56,6 @@ function handleResult(resultData) {
     rowHTML += "<th>" + resultData[0]["movie_Year"] + "</th>";
     rowHTML += "<th>" + resultData[0]["director"] + "</th>";
     rowHTML += "<th>" + resultData[0]["genres"] + "</th>";
-    // rowHTML += "<th>" + resultData[4]["stars"] + "</th>";
     rowHTML += "<th>";
     for(let j = 0; j< resultData[0]["stars"].length; j++){
         if (j == resultData[0]["stars"].length - 1) {
@@ -71,17 +70,6 @@ function handleResult(resultData) {
     rowHTML += "<th>" + resultData[0]["rating"] + "</th>";
     rowHTML += "</tr>";
     movieTableBodyElement.append(rowHTML);
-    // for (let i = 0; i < Math.min(10, resultData.length); i++) {
-    //     let rowHTML = "";
-    //     rowHTML += "<tr>";
-    //     rowHTML += "<th>" + resultData[i]["movie_title"] + "</th>";
-    //     rowHTML += "<th>" + resultData[i]["movie_year"] + "</th>";
-    //     rowHTML += "<th>" + resultData[i]["movie_director"] + "</th>";
-    //     rowHTML += "</tr>";
-    //
-    //     // Append the row created to the table body, which will refresh the page
-    //     movieTableBodyElement.append(rowHTML);
-    // }
 }
 
 /**
