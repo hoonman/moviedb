@@ -52,10 +52,10 @@ function handleResult(resultData) {
 
     // append two html <p> created to the h3 body, which will refresh the page
     if (resultData[0]["star_dob"] == null) {
-        starInfoElement.append("<p>Star Name: " + resultData[0]["star_name"] + "</p>" +
+        starInfoElement.append("<h1>Star Name: " + resultData[0]["star_name"] + "</h1>" +
             "<p>Date Of Birth: " + "N/A" + "</p>");
     } else {
-        starInfoElement.append("<p>Star Name: " + resultData[0]["star_name"] + "</p>" +
+        starInfoElement.append("<h1>Star Name: " + resultData[0]["star_name"] + "</h1>" +
             "<p>Date Of Birth: " + resultData[0]["star_dob"] + "</p>");
     }
 

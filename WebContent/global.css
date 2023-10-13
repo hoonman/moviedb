@@ -1,0 +1,8 @@
+div#data_table {
+    margin: 0 auto;
+    padding: 4rem 0;
+    width: 60rem;
+}
+p, h1{
+    text-align: center;
+}
