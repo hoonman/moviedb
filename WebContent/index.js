@@ -61,7 +61,7 @@ function handleResult(resultData) {
     // Concatenate the html tags with resultData jsonObject to create table rows
     for (let i = 0; i < Math.min(20, resultData.length); i++) {
         let rowHTML = "";
-        rowHTML += "<tr>";
+        rowHTML += "<tr class=\"table-default\">";
         rowHTML += "<th>" +'<a href="single-movie.html?id=' + resultData[i]['movie_Id'] + '">' +  resultData[i]["movie_Title"] +"</a>"+ "</th>";
         rowHTML += "<th>" + resultData[i]["movie_Year"] + "</th>";
         rowHTML += "<th>" + resultData[i]["director"] + "</th>";
