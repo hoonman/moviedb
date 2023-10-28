@@ -17,14 +17,11 @@ function handleResult(resultData) {
     console.log(resultData);
     console.log(typeof resultData!== 'undefined');
     console.log(resultData.hasOwnProperty('length'));
-    // resultData.forEach(function (item) {
-    //     console.log(item.name, item.value);
-    // });
-    // Concatenate the html tags with resultData jsonObject to create table rows
+
     if(typeof resultData !== 'undefined' && resultData.hasOwnProperty('length')) {
         for (let i = 0; i < resultData.length; i++) {
             let rowHTML = "";
-            rowHTML = '<li><a href="browse_page.html?genre=' + resultData[i]['genreID'] + '">' + resultData[i]["genreName"] + '</a></li>';
+            rowHTML = '<li><a href="browse_page.html?genreID=' + resultData[i]['genreID'] +"&page_number=1&page_size=25"+  '">' + resultData[i]["genreName"] + '</a></li>';
             // Append the row created to the table body, which will refresh the page
             console.log(rowHTML)
             genreList.append(rowHTML);
@@ -35,7 +32,7 @@ function generateLinks() {
     let characterList = jQuery("#name-list");
     const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ*';
     for(let i =0; i< characters.length; i++){
-        rowHTML = '<li><a href="browse_page.html?nameStartsWith=' + characters.charAt(i) + '">' + characters.charAt(i)+ '</a></li>';
+        rowHTML = '<li><a href="browse_page.html?nameStartsWith=' + characters.charAt(i) +"&page_number=1&page_size=25"+'">' + characters.charAt(i)+ '</a></li>';
         characterList.append(rowHTML)
 
     }
@@ -44,8 +41,8 @@ function generateLinks() {
 jQuery.ajax({
     dataType: "json",  // Setting return data type
     method: "GET",// Setting request method
-    url: "api/genre-list", // Setting request url, which is mapped by StarsServlet in Stars.java
-    success: (resultData) => handleResult(resultData) // Setting callback function to handle data returned successfully by the SingleStarServlet
+    url: "api/genre-list",
+    success: (resultData) => handleResult(resultData)
 });
 
 generateLinks();

@@ -40,21 +40,11 @@ function handleResult(resultData) {
 
     console.log("handleResult: populating star info from resultData");
 
-    // populate the star info h3
-    // find the empty h3 body by id "star_info"
-    let starInfoElement = jQuery("#star_info");
-
-    // append two html <p> created to the h3 body, which will refresh the page
-    starInfoElement.append("<p>Star Name: " + resultData[0]["star_name"] + "</p>" +
-        "<p>Date Of Birth: " + resultData[0]["star_dob"] + "</p>");
-
-    console.log("handleResult: populating movie table from resultData");
     console.log(resultData);
 
     // Populate the star table
     // Find the empty table body by id "movie_table_body"
     let movieTableBodyElement = jQuery("#movie_table_body");
-    console.log(resultData)
 
     console.log(resultData[0]["genres"])
     console.log(resultData[1]["genres"].length)
@@ -66,6 +56,7 @@ function handleResult(resultData) {
         rowHTML += "<th>" + resultData[i]["movie_Year"] + "</th>";
         rowHTML += "<th>" + resultData[i]["director"] + "</th>";
         rowHTML += "<th>";
+
         for(let j = 0; j< resultData[i]["genres"].length; j++){
             rowHTML += '<a href ="browse_page.html?genreID=' + resultData[i]["genres"][j]["id"] +"&page_number=1&page_size=25"+ '">' +  resultData[i]["genres"][j]["name"] +" "+"</a>";
         }
@@ -89,11 +80,31 @@ function handleResult(resultData) {
  * Once this .js is loaded, following scripts will be executed by the browser\
  */
 
+// Get id from URL
+let genreID = getParameterByName('genreID');
+let page_size = getParameterByName('page_size');
+let page_number = getParameterByName('page_number');
+let nameStartsWith = getParameterByName('nameStartsWith');
 
-// Makes the HTTP GET request and registers on success callback function handleResult
-jQuery.ajax({
-    dataType: "json",  // Setting return data type
-    method: "GET",// Setting request method
-    url: "api/movie-list",
-    success: (resultData) => handleResult(resultData)
-});
+
+// Check if necessary parameters are present and make AJAX requests conditionally
+if (genreID !== null && page_size !== null && page_number !== null) {
+    console.log(genreID,page_size,page_number);
+    jQuery.ajax({
+        dataType: "json",  // Setting return data type
+        method: "GET",      // Setting request method
+        url: "api/genre_selection_list?genreID=" + genreID + "&page_number=" + page_number + "&page_size=" + page_size,
+        success: (resultData) => handleResult(resultData)
+    });
+}
+
+if (nameStartsWith !== null && page_size !== null && page_number !== null) {
+    console.log(nameStartsWith,page_size,page_number);
+
+    jQuery.ajax({
+        dataType: "json",  // Setting return data type
+        method: "GET",      // Setting request method
+        url: "api/first-character?nameStartsWith=" + nameStartsWith + "&page_number=" + page_number + "&page_size=" + page_size,
+        success: (resultData) => handleResult(resultData)
+    });
+}

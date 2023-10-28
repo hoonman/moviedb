@@ -51,6 +51,9 @@ public class LoginFilter implements Filter {
         allowedURIs.add("login.js");
         allowedURIs.add("api/login");
         allowedURIs.add("api/genre-list");
+        allowedURIs.add("api/genre_selection_list");
+        allowedURIs.add("api/first-character");
+
     }
 
     public void destroy() {

@@ -14,11 +14,11 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Arrays;
 
-@WebServlet(name = "SingleMovieServlet", urlPatterns = "/api/single-movie")
-public class SingleMovieServlet extends HttpServlet {
-    private static final long serialVersionUID = 3L;
+// Declaring a WebServlet called SingleStarServlet, which maps to url "/api/single-star"
+@WebServlet(name = "GenreSelectServlet", urlPatterns = "/api/genre_selection_list")
+public class GenreSelectServlet extends HttpServlet {
+    private static final long serialVersionUID = 2L;
 
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
@@ -38,66 +38,32 @@ public class SingleMovieServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         response.setContentType("application/json"); // Response mime type
+
+        // Retrieve parameter id from url request.
+        String genreID = request.getParameter("genreID");
+        String page_number = request.getParameter("page_number");
+        String page_size = request.getParameter("page_size");
+
+        // The log message can be found in localhost log
+        request.getServletContext().log("getting genreID: " + genreID);
+
+        // Output stream to STDOUT
         PrintWriter out = response.getWriter();
 
         // Get a connection from dataSource and let resource manager close the connection after usage.
         try (Connection conn = dataSource.getConnection()) {
-            // Get a connection from dataSource
 
-            String id2 = request.getParameter("id");
-
-            // The log message can be found in localhost log
-            request.getServletContext().log("getting id: " + id2);
-
-            String query = "SELECT\n" +
-                    "    sub.MovieId,\n" +
-                    "    sub.MovieTitle,\n" +
-                    "    sub.MovieYear,\n" +
-                    "    sub.Director,\n" +
-                    "    sub.Genres,\n" +
-                    "    sub.Stars,\n" +
-                    "    r.rating AS Rating\n" +
-                    "FROM\n" +
-                    "    (\n" +
-                    "        SELECT\n" +
-                    "            m.id AS MovieId,\n" +
-                    "            m.title AS MovieTitle,\n" +
-                    "            m.year AS MovieYear,\n" +
-                    "            m.director AS Director,\n" +
-                    "            (\n" +
-                    "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids))\n" +
-                    "                FROM (\n" +
-                    "                    SELECT DISTINCT g.name AS names, g.id as ids\n" +
-                    "                    FROM genres_in_movies gim\n" +
-                    "                    JOIN genres g ON gim.genreId = g.id\n" +
-                    "                    WHERE gim.movieId = m.id\n" +
-                    "                ) AS SubGenres\n" +
-                    "            ) AS Genres,\n" +
-                    "            (\n" +
-                    "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids))\n" +
-                    "                FROM (\n" +
-                    "                    SELECT DISTINCT s.name AS names, s.id as ids\n" +
-                    "                    FROM stars_in_movies sim\n" +
-                    "                    JOIN stars s ON sim.starId = s.id\n" +
-                    "                    WHERE sim.movieId = m.id\n" +
-                    "                ) AS SubStars\n" +
-                    "            ) AS Stars\n" +
-                    "        FROM\n" +
-                    "            movies m\n" +
-                    "        WHERE\n" +
-                    "            m.id = ?\n" +
-                    "    ) AS sub\n" +
-                    "JOIN ratings r ON sub.MovieId = r.movieId\n" +
-                    "ORDER BY\n" +
-                    "    r.rating DESC\n" +
-                    "LIMIT 20;\n";
-
-
+            String query = "SELECT     sub.MovieId,     sub.MovieTitle,     sub.MovieYear,     sub.Director,     sub.Genres,     sub.Stars,     r.rating AS Rating FROM (     SELECT         m.id AS MovieId,         m.title AS MovieTitle,         m.year AS MovieYear,         m.director AS Director,         (SELECT GROUP_CONCAT(CONCAT(names,\"|\", ids)) FROM (SELECT DISTINCT g.name AS names, g.id as ids          FROM genres_in_movies gim JOIN genres g ON gim.genreId = g.id          WHERE gim.movieId = m.id          LIMIT 3) AS SubGenres) AS Genres,       ( SELECT GROUP_CONCAT(CONCAT(names,\"|\",ids)) FROM ( SELECT DISTINCT s.name AS names, s.id as ids FROM stars_in_movies  sim        JOIN stars s ON sim.starId = s.id         WHERE sim.movieId = m.id         LIMIT 3) AS SubStars) AS Stars     FROM movies m WHERE m.id IN (SELECT gim.movieId FROM genres_in_movies gim JOIN genres g ON gim.genreId = g.id  WHERE g.id = ?)) AS sub JOIN ratings r ON sub.MovieId = r.movieId ORDER BY r.rating DESC LIMIT ?, ?;";
+            // Declare our statement
             PreparedStatement statement = conn.prepareStatement(query);
 
-            // Perform the query
-            statement.setString(1, id2);
+            statement.setInt(1, Integer.parseInt(genreID));
+            statement.setInt(2, Integer.parseInt(page_number) * Integer.parseInt(page_size));
+            statement.setInt(3, Integer.parseInt(page_size));
+//            System.out.println(query);
 
+
+            // Perform the query
             ResultSet rs = statement.executeQuery();
 
             JsonArray jsonArray = new JsonArray();
@@ -113,6 +79,7 @@ public class SingleMovieServlet extends HttpServlet {
                 String genres = rs.getString("Genres");
                 String stars = rs.getString("Stars");
 
+
                 String rating = rs.getString("Rating");
 
                 // Create a JsonObject based on the data we retrieve from rs
@@ -122,24 +89,22 @@ public class SingleMovieServlet extends HttpServlet {
                 jsonObject.addProperty("movie_Title", movieTitle);
                 jsonObject.addProperty("movie_Year", movieYear);
                 jsonObject.addProperty("director", director);
-//                jsonObject.addProperty("genres", genres);
+
                 JsonArray genreJsonArray = new JsonArray();
                 String[] genres_split = genres.split(",");
                 // Iterate through the list and split each string
                 for (String genre : genres_split) {
-                    JsonObject genreObject = new JsonObject();
+                    JsonObject actorObject = new JsonObject();
                     String[] parts = genre.split("\\|");
                     String name = parts[0];
                     String id = parts[1];
-                    genreObject.addProperty("name", name);
-                    genreObject.addProperty("id", id);
-                    genreJsonArray.add(genreObject);
+                    actorObject.addProperty("name", name);
+                    actorObject.addProperty("id", id);
+                    genreJsonArray.add(actorObject);
                 }
                 jsonObject.add("genres", genreJsonArray);
 
                 JsonArray starsJsonArray = new JsonArray();
-
-//                jsonObject.addP("stars", actorObject);
 
                 String[] actors = stars.split(",");
                 // Iterate through the list and split each string
