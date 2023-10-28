@@ -36,16 +36,21 @@ public class CharacterMovieSelectServlet extends HttpServlet {
      * response)
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String query = "SELECT     sub.MovieId,     sub.MovieTitle,     sub.MovieYear,     sub.Director,     sub.Genres,     sub.Stars,     r.rating AS Rating FROM (     SELECT         m.id AS MovieId,         m.title AS MovieTitle,         m.year AS MovieYear,         m.director AS Director,         (SELECT GROUP_CONCAT(CONCAT(names,\"|\", ids)) FROM (SELECT DISTINCT g.name AS names, g.id as ids          FROM genres_in_movies gim JOIN genres g ON gim.genreId = g.id          WHERE gim.movieId = m.id          LIMIT 3) AS SubGenres) AS Genres,       ( SELECT GROUP_CONCAT(CONCAT(names,\"|\",ids)) FROM ( SELECT DISTINCT s.name AS names, s.id as ids FROM stars_in_movies  sim        JOIN stars s ON sim.starId = s.id         WHERE sim.movieId = m.id         LIMIT 3) AS SubStars) AS Stars     FROM movies m WHERE m.id IN (SELECT gim.movieId FROM genres_in_movies gim JOIN genres g ON gim.genreId = g.id)AND SUBSTRING(m.title,1, 1) = ?) AS sub JOIN ratings r ON sub.MovieId = r.movieId ORDER BY r.rating DESC LIMIT ?, ?;";
 
         response.setContentType("application/json"); // Response mime type
 
         // Retrieve parameter id from url request.
         String character = request.getParameter("nameStartsWith");
-        String page_number = request.getParameter("page_number");
+        int page_number = Integer.parseInt(request.getParameter("page_number")) - 1;
         String page_size = request.getParameter("page_size");
 
         // The log message can be found in localhost log
         request.getServletContext().log("getting genreID: " + character);
+        if(character.equals("*")){
+            System.out.println("here");
+            query = "SELECT     sub.MovieId,     sub.MovieTitle,     sub.MovieYear,     sub.Director,     sub.Genres,     sub.Stars,     r.rating AS Rating FROM (     SELECT         m.id AS MovieId,         m.title AS MovieTitle,         m.year AS MovieYear,         m.director AS Director,         (SELECT GROUP_CONCAT(CONCAT(names,\"|\", ids)) FROM (SELECT DISTINCT g.name AS names, g.id as ids          FROM genres_in_movies gim JOIN genres g ON gim.genreId = g.id          WHERE gim.movieId = m.id          LIMIT 3) AS SubGenres) AS Genres,       ( SELECT GROUP_CONCAT(CONCAT(names,\"|\",ids)) FROM ( SELECT DISTINCT s.name AS names, s.id as ids FROM stars_in_movies  sim        JOIN stars s ON sim.starId = s.id         WHERE sim.movieId = m.id         LIMIT 3) AS SubStars) AS Stars     FROM movies m WHERE m.id IN (SELECT gim.movieId FROM genres_in_movies gim JOIN genres g ON gim.genreId = g.id) AND m.title NOT REGEXP '^[A-Za-z0-9]') AS sub JOIN ratings r ON sub.MovieId = r.movieId ORDER BY r.rating DESC LIMIT ?, ?;";
+        }
 
         // Output stream to STDOUT
         PrintWriter out = response.getWriter();
@@ -53,15 +58,17 @@ public class CharacterMovieSelectServlet extends HttpServlet {
         // Get a connection from dataSource and let resource manager close the connection after usage.
         try (Connection conn = dataSource.getConnection()) {
 
-            String query = "SELECT     sub.MovieId,     sub.MovieTitle,     sub.MovieYear,     sub.Director,     sub.Genres,     sub.Stars,     r.rating AS Rating FROM (     SELECT         m.id AS MovieId,         m.title AS MovieTitle,         m.year AS MovieYear,         m.director AS Director,         (SELECT GROUP_CONCAT(CONCAT(names,\"|\", ids)) FROM (SELECT DISTINCT g.name AS names, g.id as ids          FROM genres_in_movies gim JOIN genres g ON gim.genreId = g.id          WHERE gim.movieId = m.id          LIMIT 3) AS SubGenres) AS Genres,       ( SELECT GROUP_CONCAT(CONCAT(names,\"|\",ids)) FROM ( SELECT DISTINCT s.name AS names, s.id as ids FROM stars_in_movies  sim        JOIN stars s ON sim.starId = s.id         WHERE sim.movieId = m.id         LIMIT 3) AS SubStars) AS Stars     FROM movies m WHERE m.id IN (SELECT gim.movieId FROM genres_in_movies gim JOIN genres g ON gim.genreId = g.id)AND SUBSTRING(m.title,1, 1) = ?) AS sub JOIN ratings r ON sub.MovieId = r.movieId ORDER BY r.rating DESC LIMIT ?, ?;";
             // Declare our statement
             PreparedStatement statement = conn.prepareStatement(query);
-
-            statement.setString(1, character);
-            statement.setInt(2, Integer.parseInt(page_number) * Integer.parseInt(page_size));
-            statement.setInt(3, Integer.parseInt(page_size));
-//            System.out.println(query);
-
+            if(character.equals("*")){
+                statement.setInt(1, page_number* Integer.parseInt(page_size));
+                statement.setInt(2, Integer.parseInt(page_size));
+                System.out.println(statement);
+            }else{
+                statement.setString(1, character);
+                statement.setInt(2, page_number * Integer.parseInt(page_size));
+                statement.setInt(3, Integer.parseInt(page_size));
+            }
 
             // Perform the query
             ResultSet rs = statement.executeQuery();

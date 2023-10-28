@@ -58,7 +58,7 @@ public class GenreSelectServlet extends HttpServlet {
             PreparedStatement statement = conn.prepareStatement(query);
 
             statement.setInt(1, Integer.parseInt(genreID));
-            statement.setInt(2, Integer.parseInt(page_number) * Integer.parseInt(page_size));
+            statement.setInt(2, (Integer.parseInt(page_number)-1) * Integer.parseInt(page_size));
             statement.setInt(3, Integer.parseInt(page_size));
 //            System.out.println(query);
 

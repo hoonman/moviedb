@@ -53,6 +53,8 @@ public class LoginFilter implements Filter {
         allowedURIs.add("api/genre-list");
         allowedURIs.add("api/genre_selection_list");
         allowedURIs.add("api/first-character");
+        allowedURIs.add("api/single-movie");
+
 
     }
 

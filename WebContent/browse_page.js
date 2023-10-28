@@ -46,8 +46,8 @@ function handleResult(resultData) {
     // Find the empty table body by id "movie_table_body"
     let movieTableBodyElement = jQuery("#movie_table_body");
 
-    console.log(resultData[0]["genres"])
-    console.log(resultData[1]["genres"].length)
+    // console.log(resultData[0]["genres"])
+    // console.log(resultData[1]["genres"].length)
     // Concatenate the html tags with resultData jsonObject to create table rows
     for (let i = 0; i < Math.min(20, resultData.length); i++) {
         let rowHTML = "";
