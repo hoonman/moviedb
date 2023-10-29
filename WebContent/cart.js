@@ -28,7 +28,7 @@ function displayData(previousItemArr) {
         let rowHTML = "<tr>";
         rowHTML += "<th>" + movieName + "</th>";
         rowHTML += "<th><button class='plus' data-movie-title='" + movieName + "'>+</button>";
-        rowHTML += quantity
+        rowHTML += "<span class='quantity'>" + quantity + "</span>";
         rowHTML += "<button class='minus' data-movie-title='" + movieName + "'>-</button></th>";
         rowHTML += "<th><button class='delete' data-movie-title='" + movieName + "'> Delete </button></th>";
         rowHTML += "<th>" + cost + "</th>";
@@ -40,11 +40,65 @@ function displayData(previousItemArr) {
     }
 
     $(".minus").click(function() {
-        // Access the "data-movie-title" attribute of the clicked button
         var movieTitle = $(this).data("movie-title");
+        var quantity = $(this).closest("tr").find(".quantity");
+        var currentQuantity = parseInt(quantity.text());
+        let rowToDelete = $("#cart_body tr").filter(function () {
+            return $(this).find("th:first").text() === movieTitle;
+        });
+
+
+        let globalResultData2 = globalResultData["previousItems"];
+
+        var data = {
+            movieName: movieTitle,
+            quantity: 1,
+            cost: 30,
+            remove: "Yes"
+        };
+        if (currentQuantity <= 1) {
+            console.log("quantity is zero we must remove");
+            //delete the movie
+            rowToDelete.remove();
+            data.remove = "Delete";
+
+        } else {
+            data.quantity = data.quantity - 1;
+            data.remove = "Yes";
+            quantity.text(currentQuantity - 1);
+        }
+
+        // for (let i = 0; i < globalResultData2.length; i++) {
+        //     if (globalResultData2[i].movieName === movieTitle) {
+        //         let finalQuantity = globalResultData2[i].quantity - 1;
+        //         console.log("finalQuantity = ", finalQuantity);
+        //         if (currentQuantity === 0) {
+        //             console.log("the quantity is zero now we must remove");
+        //             data = {
+        //                 movieName: movieTitle,
+        //                 quantity: 1,
+        //                 cost: 30,
+        //                 remove: "Delete"
+        //             };
+        //             // data.remove = "Delete"
+        //             rowToDelete.remove();
+        //         } else {
+        //             data.remove = "Yes";
+        //             data.quantity = finalQuantity;
+        //             quantity.text(currentQuantity - 1);
+        //         }
+        //     }
+        // }
+        sendPost(data);
+
+    });
+    $(".plus").click(function() {
+        var movieTitle = $(this).data("movie-title");
+        var quantity = $(this).closest("tr").find(".quantity");
+        var currentQuantity = parseInt(quantity.text());
+        var table = $(this).data("rowHTML");
 
         // Do something with the movieTitle, e.g., add it to the cart
-        console.log("Movie Title: " + movieTitle);
         // make a ajax request to send the data
 
         let globalResultData2 = globalResultData["previousItems"];
@@ -58,30 +112,11 @@ function displayData(previousItemArr) {
         for (let i = 0; i < globalResultData2.length; i++) {
             if (globalResultData2[i].movieName === movieTitle) {
                 // increment the quantity of globalResultData[i]
-                let finalQuantity = globalResultData2[i].quantity - 1;
-                console.log(finalQuantity)
-                if (finalQuantity === 0) {
-                    //remove it from the list
-                    data.remove = "delete";
-                } else {
-                    data.remove = "Yes";
-                    data.quantity = finalQuantity;
-                }
-
+                let finalQuantity = globalResultData2[i].quantity + 1;
+                data.quantity = finalQuantity;
+                quantity.text(currentQuantity + 1);
             }
         }
-
-        $.ajax({
-            type: "POST",
-            url: "api/cart",
-            data: data,
-            success: function(response) {
-                console.log("Data sent to CartServlet successfully:", response);
-            },
-            error: function(err) {
-                console.error("Error while sending data to CartServlet:", err);
-            }
-        });
 
         // $.ajax({
         //     type: "POST",
@@ -94,36 +129,56 @@ function displayData(previousItemArr) {
         //         console.error("Error while sending data to CartServlet:", err);
         //     }
         // });
+        sendPost(data);
+
     });
+
+    $(".delete").click(function() {
+        let movieTitle = $(this).data("movie-title");
+        let rowToDelete = $("#cart_body tr").filter(function () {
+            return $(this).find("th:first").text() === movieTitle;
+        });
+        //populate the data
+
+        var data = {
+            movieName: movieTitle,
+            quantity: 1,
+            cost: 30,
+            remove: "Delete"
+        };
+        globalResultData2 = globalResultData["previousItems"];
+
+        for (let i = 0; i < globalResultData2.length; i++) {
+            if (globalResultData2[i].movieName === movieTitle) {
+                //delete it from the record
+                // data.remove = "Delete";
+            }
+        }
+        rowToDelete.remove();
+        sendPost(data);
+    });
+
+
 
 }
 
-// $(document).on("click", ".plus", function() {
-//     // we meed to modify the result data and send it back
-//     let movieName = $(this).data("movieId");
-//     console.log("plus button clicked: ", movieName);
-//
-//     // Find the item in the globalResultData and modify it
-//     // let itemToModify = globalResultData.previousItems.find(item => item.movieName === movieName);
-//     let itemToModify = null;
-//     for (let i = 0; i < globalResultdata.length; i++) {
-//         if (globalResultdata[i] === movieName) {
-//             // increment the quantity of globalResultData[i]
-//             globalResultdata[i].quantity += 1;
-//         }
-//     }
-//
-//     // Send the modified data back to the server using a POST request
-//     $.ajax("api/cart", {
-//         method: "POST",
-//         data: JSON.stringify(globalResultData), // Send the modified data
-//         contentType: "application/json",
-//         success: function (response) {
-//             // Handle the response if needed
-//         }
-//     });
-// });
-//
+
+function sendPost(data) {
+    $.ajax({
+        type: "POST",
+        url: "api/cart",
+        data: data,
+        success: function(response) {
+            console.log("Data sent to CartServlet successfully:", response);
+        },
+        error: function(err) {
+            console.error("Error while sending data to CartServlet:", err);
+        }
+    });
+}
+
+
+
 $.ajax("api/cart", {
     method: "GET",
     success: handleSessionData
