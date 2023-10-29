@@ -37,26 +37,14 @@ function getParameterByName(target) {
  */
 
 function handleResult(resultData) {
-
-    console.log("handleResult: populating star info from resultData");
-
-    // populate the star info h3
-    // find the empty h3 body by id "star_info"
     let movieInfoElement = jQuery("#movie_info");
-
-    // append two html <p> created to the h3 body, which will refresh the page
     movieInfoElement.append("<h1> " + resultData[0]["movie_Title"] + "</h1>");
-
-    console.log("handleResult: populating movie table from resultData");
     let movieTableBodyElement = jQuery("#single_movie_table_body");
     let rowHTML = "";
     rowHTML += "<tr>";
-    // rowHTML += "<th>" +'<a href="single-movie.html?id=' + resultData[0]['movie_Id'] + '">' +  resultData[0]["movie_Title"] +"</a>"+ "</th>";
-    // rowHTML += "<th>" +'<a href="single-movie.html?id=' + resultData[0]['movie_Id'] + '">' +  resultData[0]["movie_Title"] +"</a>"+ "</th>";
     rowHTML += "<th>" + resultData[0]["movie_Year"] + "</th>";
     rowHTML += "<th>" + resultData[0]["director"] + "</th>";
     rowHTML += "<th>";
-
     for(let j = 0; j< resultData[0]["genres"].length; j++){
         rowHTML +=  resultData[0]["genres"][j]["name"] +" ";
     }
@@ -71,11 +59,41 @@ function handleResult(resultData) {
         }
 
     }
+    rowHTML += "<th><button class='cart-button' data-movie-title='" + resultData[0]["movie_Title"] + "'>Add to Cart</button>"
     rowHTML += "</th>";
     rowHTML += "<th>" + resultData[0]["rating"] + "</th>";
     rowHTML += "</tr>";
     movieTableBodyElement.append(rowHTML);
+    $(".cart-button").click(function() {
+        // Access the "data-movie-title" attribute of the clicked button
+        var movieTitle = $(this).data("movie-title");
+
+        // Do something with the movieTitle, e.g., add it to the cart
+        console.log("Movie Title: " + movieTitle);
+        // make a ajax request to send the data
+        var data = {
+            movieName: movieTitle,
+            quantity: 1,
+            cost: 30,
+            remove: "No",
+        };
+
+        console.log("data looks like: ", data);
+
+        $.ajax({
+            type: "POST",
+            url: "api/cart",
+            data: data,
+            success: function(response) {
+                console.log("Data sent to CartServlet successfully:", response);
+            },
+            error: function(err) {
+                console.error("Error while sending data to CartServlet:", err);
+            }
+        });
+    });
 }
+
 
 /**
  * Once this .js is loaded, following scripts will be executed by the browser\
