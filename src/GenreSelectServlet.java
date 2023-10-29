@@ -15,7 +15,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-// Declaring a WebServlet called SingleStarServlet, which maps to url "/api/single-star"
 @WebServlet(name = "GenreSelectServlet", urlPatterns = "/api/genre_selection_list")
 public class GenreSelectServlet extends HttpServlet {
     private static final long serialVersionUID = 2L;
@@ -60,7 +59,6 @@ public class GenreSelectServlet extends HttpServlet {
             statement.setInt(1, Integer.parseInt(genreID));
             statement.setInt(2, (Integer.parseInt(page_number)-1) * Integer.parseInt(page_size));
             statement.setInt(3, Integer.parseInt(page_size));
-//            System.out.println(query);
 
 
             // Perform the query
