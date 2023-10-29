@@ -6,6 +6,14 @@ jQuery(document).ready(function () {
     '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
   navHTML += '<span class="navbar-toggler-icon"></span>';
   navHTML += "</button>";
+
+  navHTML += '<ul class="navbar-nav me-auto mb-2 mb-lg-0">';
+  navHTML += '<li class="nav-item">';
+  navHTML +=
+    '<a class="nav-link" aria-current="page" href="movie-list.html">Movie List</a>';
+  navHTML += "</li>";
+  navHTML += "</ul>";
+
   navHTML += '<form id="search-form" class="form-inline ml-auto">';
   navHTML +=
     '<input id="title-input" class="form-control mr-sm-2" type="text" placeholder="Search by Title" aria-label="Search">';
