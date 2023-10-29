@@ -10,7 +10,7 @@ jQuery(document).ready(function () {
   navHTML += '<ul class="navbar-nav me-auto mb-2 mb-lg-0">';
   navHTML += '<li class="nav-item">';
   navHTML +=
-    '<a class="nav-link" aria-current="page" href="movie-list.html">Movie List</a>';
+    '<a class="nav-link" aria-current="page" href="browse_page.html">Movie List</a>';
   navHTML += "</li>";
   navHTML += "</ul>";
 
@@ -44,7 +44,7 @@ jQuery(document).ready(function () {
     // Redirect to the search results page
 
     window.location.href =
-      "browse_page.html?title=" +
+      "browse_page.html?search=true&title=" +
       title +
       "&year=" +
       year +

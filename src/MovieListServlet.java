@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @WebServlet(name = "MovieListServlet", urlPatterns = {"/api/movie-list", "/api/genre_selection_list", "/api/first-character",  "/api/search-movies"})
@@ -32,6 +33,32 @@ public class MovieListServlet extends HttpServlet {
             e.printStackTrace();
         }
     }
+
+    private String constructSortQuery(String sortField) {
+        StringBuilder sortQuery = new StringBuilder("ORDER BY ");
+        String[] sortingOrder = sortField.split("_");
+        for(int i = 0; i< sortingOrder.length; i++){
+            if(i == 2){
+                sortQuery.append(", ");
+            }
+            if(i%2 == 0){
+                if(sortingOrder[i].equalsIgnoreCase("rating")){
+                    sortQuery.append("r.rating ");
+                }else{
+                    sortQuery.append("sub.MovieTitle ");
+                }
+            }else{
+                if(sortingOrder[i].equalsIgnoreCase("ASC")){
+                    sortQuery.append("ASC ");
+                }else{
+                    sortQuery.append("DESC ");
+                }
+            }
+        }
+        return sortQuery.toString();
+    }
+
+
     private boolean isNullOrEmpty(String s) {
         return s == null || s.trim().isEmpty();
     }
@@ -145,6 +172,10 @@ public class MovieListServlet extends HttpServlet {
     }
 
     protected void handleCharacterRequest(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        String order = request.getParameter("order");
+        if(order == null){
+            order = "RATING_DESC_TABLES_DESC";
+        }
         // Retrieve parameter id from url request.
         String character = request.getParameter("nameStartsWith");
         String page_number = request.getParameter("page_number");
@@ -211,9 +242,11 @@ public class MovieListServlet extends HttpServlet {
                     "    ) " +
                     "    AND SUBSTRING(m.title, 1, 1) = ?" +
                     ") AS sub " +
-                    "JOIN ratings r ON sub.MovieId = r.movieId " +
-                    "ORDER BY r.rating DESC " +
-                    "LIMIT ?, ?;";
+                    "JOIN ratings r ON sub.MovieId = r.movieId " ;
+            query += constructSortQuery(order);
+//                "ORDER BY r.rating DESC, sub.MovieTitle ASC\n";
+
+            query += "LIMIT ?,?;\n";
         }
 
 
@@ -222,6 +255,10 @@ public class MovieListServlet extends HttpServlet {
 
     }
     protected void handleSearchRequest(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        String order = request.getParameter("order");
+        if(order == null){
+            order = "RATING_DESC_TABLES_DESC";
+        }
         // Retrieve parameter id from url request.
         String title = request.getParameter("title");
         String str_year = request.getParameter("year");
@@ -296,15 +333,21 @@ public class MovieListServlet extends HttpServlet {
                 "            FROM stars\n" +
                 "            WHERE (name LIKE ? OR ? = '!')\n" +
                 "        )\n" +
-                "    )\n"+
-                "ORDER BY r.rating DESC\n" +
-                "LIMIT ?,?;\n";
+                "    )\n";
+        query += constructSortQuery(order);
+//                "ORDER BY r.rating DESC, sub.MovieTitle ASC\n";
+
+        query += "LIMIT ?,?;\n";
 
         sendResponse(request, response ,query,params);
 
     }
 
     protected void handleGenreRequest(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        String order = request.getParameter("order");
+        if(order == null){
+            order = "RATING_DESC_TABLES_DESC";
+        }
         // Retrieve parameter id from url request.
         String genreID = request.getParameter("genreID");
         String page_number = request.getParameter("page_number");
@@ -361,15 +404,21 @@ public class MovieListServlet extends HttpServlet {
                 "                WHERE g.id = ?\n" +
                 "            )\n" +
                 "    ) AS sub\n" +
-                "JOIN ratings r ON sub.MovieId = r.movieId\n" +
-                "ORDER BY r.rating DESC\n" +
-                "LIMIT ?, ?;\n";
+                "JOIN ratings r ON sub.MovieId = r.movieId\n";
+        query += constructSortQuery(order);
+//                "ORDER BY r.rating DESC, sub.MovieTitle ASC\n";
+
+        query += "LIMIT ?,?;\n";
 
 
         sendResponse(request, response ,query,params);
 
     }
     protected void handleMovieList(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        String order = request.getParameter("order");
+        if(order == null){
+            order = "RATING_DESC_TABLES_DESC";
+        }
         String query = "SELECT\n" +
                 "    sub.MovieId,\n" +
                 "    sub.MovieTitle,\n" +
@@ -410,11 +459,14 @@ public class MovieListServlet extends HttpServlet {
                 "        FROM\n" +
                 "            movies m\n" +
                 "    ) AS sub\n" +
-                "JOIN ratings r ON sub.MovieId = r.movieId\n" +
-                "ORDER BY r.rating DESC, sub.MovieTitle ASC\n" +
-                "LIMIT ?,?;\n";
+                "JOIN ratings r ON sub.MovieId = r.movieId\n";
+                query += constructSortQuery(order);
+//                "ORDER BY r.rating DESC, sub.MovieTitle ASC\n";
+
+                query += "LIMIT ?,?;\n";
         String page_number = request.getParameter("page_number");
         String page_size = request.getParameter("page_size");
+
         page_number = isNullOrEmpty(page_number)? "1" :  page_number;
         page_size = isNullOrEmpty(page_size)? "25" :  page_size;
 
@@ -430,6 +482,7 @@ public class MovieListServlet extends HttpServlet {
         String pathInfo = request.getServletPath();
         response.setContentType("application/json"); // Response mime type
                   // Construct a query with parameter represented by "?"
+
 
         switch (pathInfo) {
             case "/api/genre_selection_list":

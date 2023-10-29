@@ -1,19 +1,13 @@
 /**
- * This example is following frontend and backend separation.
- *
- * Before this .js is loaded, the html skeleton is created.
- *
- * This .js performs three steps:
- *      1. Get parameter from request URL so it know which id to look for
- *      2. Use jQuery to talk to backend API to get the json data.
- *      3. Populate the data to correct html elements.
- */
-
-/**
  * Retrieve parameter from request URL, matching by parameter name
  * @param target String
  * @returns {*}
  */
+
+let order_string = "RATING_DESC_TABLES_DESC";
+let page_size_amt = 25;
+let page_num = 1;
+
 function getParameterByName(target) {
   // Get request URL
   let url = window.location.href;
@@ -43,11 +37,10 @@ function handleResult(resultData) {
   // Populate the star table
   // Find the empty table body by id "movie_table_body"
   let movieTableBodyElement = jQuery("#movie_table_body");
+  movieTableBodyElement.empty();
 
-  // console.log(resultData[0]["genres"])
-  // console.log(resultData[1]["genres"].length)
   // Concatenate the html tags with resultData jsonObject to create table rows
-  for (let i = 0; i < Math.min(20, resultData.length); i++) {
+  for (let i = 0; i < resultData.length; i++) {
     let rowHTML = "";
     rowHTML += '<tr class="table-default">';
     rowHTML +=
@@ -93,84 +86,132 @@ function handleResult(resultData) {
     movieTableBodyElement.append(rowHTML);
   }
 }
+$(".dropdown-item").click(function (event) {
+  event.preventDefault();
+
+  var selectedOption = $(this).data("value");
+  $("#dropdown").html($(this).text());
+  order_string = selectedOption;
+  // Make an API call based on the selected option
+  populate_table(selectedOption, page_size_amt);
+});
+$(".display-amt-item").click(function (event) {
+  event.preventDefault();
+
+  var selectedNumber = $(this).data("value");
+  $("#dropdown_display").html($(this).text());
+  page_size_amt = selectedNumber;
+  // window.location.href = window.location.href.replace(regex, replacement);
+  // Make an API call based on the selected option
+  populate_table(order_string, selectedNumber);
+});
+
+function populate_table(order, page_size_amt = null, page_num = null) {
+  // Get id from URL
+  let genreID = getParameterByName("genreID");
+  let page_size =
+    page_size_amt != null
+      ? page_size_amt
+      : getParameterByName("page_size")
+      ? getParameterByName("page_size")
+      : 25;
+  let page_number = page_num
+    ? page_num
+    : getParameterByName("page_number")
+    ? getParameterByName("page_number")
+    : 1;
+  let nameStartsWith = getParameterByName("nameStartsWith");
+  let title = getParameterByName("title");
+  let year = getParameterByName("year");
+  let director = getParameterByName("director");
+  let starName = getParameterByName("star_name");
+  let search = getParameterByName("search");
+
+  // Check if necessary parameters are present and make AJAX requests conditionally
+  if (genreID !== null && page_size !== null && page_number !== null) {
+    console.log(genreID, page_size, page_number);
+    jQuery.ajax({
+      dataType: "json", // Setting return data type
+      method: "GET", // Setting request method
+      url:
+        "api/genre_selection_list?genreID=" +
+        genreID +
+        "&page_number=" +
+        page_number +
+        "&page_size=" +
+        page_size +
+        "&order=" +
+        order,
+      success: (resultData) => handleResult(resultData),
+    });
+  }
+  if (nameStartsWith !== null && page_size !== null && page_number !== null) {
+    console.log(nameStartsWith, page_size, page_number);
+
+    jQuery.ajax({
+      dataType: "json", // Setting return data type
+      method: "GET", // Setting request method
+      url:
+        "api/first-character?nameStartsWith=" +
+        nameStartsWith +
+        "&page_number=" +
+        page_number +
+        "&page_size=" +
+        page_size +
+        "&order=" +
+        order,
+      success: (resultData) => handleResult(resultData),
+    });
+  }
+  if (search) {
+    console.log(title, year, director, starName, page_size, page_number);
+    if (page_number === null) {
+      page_number = 1;
+    }
+    if (page_size === null) {
+      page_size = 25;
+    }
+    jQuery.ajax({
+      dataType: "json", // Setting return data type
+      method: "GET", // Setting request method
+      url:
+        "api/search-movies?title=" +
+        title +
+        "&year=" +
+        year +
+        "&director=" +
+        director +
+        "&star_name=" +
+        starName +
+        "&page_number=" +
+        page_number +
+        "&page_size=" +
+        page_size +
+        "&order=" +
+        order,
+      success: (resultData) => handleResult(resultData),
+    });
+  }
+  if (!search && !nameStartsWith && !genreID) {
+    jQuery.ajax({
+      dataType: "json", // Setting return data type
+      method: "GET", // Setting request method
+      url:
+        "api/movie-list?" +
+        "&page_number=" +
+        page_number +
+        "&page_size=" +
+        page_size +
+        "&order=" +
+        order,
+      success: (resultData) => handleResult(resultData),
+    });
+  }
+}
 
 /**
  * Once this .js is loaded, following scripts will be executed by the browser\
  */
-
-// Get id from URL
-let genreID = getParameterByName("genreID");
-let page_size = getParameterByName("page_size");
-let page_number = getParameterByName("page_number");
-let nameStartsWith = getParameterByName("nameStartsWith");
-let title = getParameterByName("title");
-let year = getParameterByName("year");
-let director = getParameterByName("director");
-let starName = getParameterByName("star_name");
-
-// Check if necessary parameters are present and make AJAX requests conditionally
-if (genreID !== null && page_size !== null && page_number !== null) {
-  console.log(genreID, page_size, page_number);
-  jQuery.ajax({
-    dataType: "json", // Setting return data type
-    method: "GET", // Setting request method
-    url:
-      "api/genre_selection_list?genreID=" +
-      genreID +
-      "&page_number=" +
-      page_number +
-      "&page_size=" +
-      page_size,
-    success: (resultData) => handleResult(resultData),
-  });
-}
-
-if (nameStartsWith !== null && page_size !== null && page_number !== null) {
-  console.log(nameStartsWith, page_size, page_number);
-
-  jQuery.ajax({
-    dataType: "json", // Setting return data type
-    method: "GET", // Setting request method
-    url:
-      "api/first-character?nameStartsWith=" +
-      nameStartsWith +
-      "&page_number=" +
-      page_number +
-      "&page_size=" +
-      page_size,
-    success: (resultData) => handleResult(resultData),
-  });
-}
-
-if (
-  title.length === 0 ||
-  year.length === 0 ||
-  director.length === 0 ||
-  starName.length === 0
-) {
-  console.log(title, year, director, starName, page_size, page_number);
-  if (page_number === null) {
-    page_number = 1;
-  }
-  if (page_size === null) {
-    page_size = 25;
-  }
-  jQuery.ajax({
-    dataType: "json", // Setting return data type
-    method: "GET", // Setting request method
-    url:
-      "api/search-movies?title=" +
-      title +
-      "&year=" +
-      year +
-      "&director=" +
-      director +
-      "&star_name=" +
-      starName +
-      "&page_number=" +
-      page_number +
-      "&page_size=" +
-      page_size,
-    success: (resultData) => handleResult(resultData),
-  });
-}
+$(document).ready(function () {
+  populate_table(order_string);
+});

@@ -23,6 +23,37 @@
 <div id="navbar-container"></div>
 
 <h1 id="filter_title">Browsing</h1>
+<div class="btn-group dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="dropdown">
+        Select an Option
+    </button>
+    <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="#" data-value="RATING_DESC_TABLES_DESC">RATING DESC TABLES DESC</a></li>
+        <li><a class="dropdown-item" href="#" data-value="RATING_ASC_TABLES_DESC">RATING ASC TABLES DESC</a></li>
+        <li><a class="dropdown-item" href="#" data-value="RATING_DESC_TABLES_ASC">RATING DESC TABLES ASC</a></li>
+        <li><a class="dropdown-item" href="#" data-value="RATING_ASC_TABLES_ASC">RATING ASC TABLES ASC</a></li>
+        <li><a class="dropdown-item" href="#" data-value="TABLES_DESC_RATING_DESC">TABLES DESC RATING DESC</a></li>
+        <li><a class="dropdown-item" href="#" data-value="TABLES_ASC_RATING_DESC">TABLES DESC RATING DESC</a></li>
+        <li><a class="dropdown-item" href="#" data-value="TABLES_DESC_RATING_ASC">TABLES DESC RATING ASC </a></li>
+        <li><a class="dropdown-item" href="#" data-value="TABLES_ASC_RATING_ASC">TABLES ASC RATING ASC </a></li>
+    </ul>
+</div>
+<div class="btn-group dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="dropdown_display">
+        Select an Option
+    </button>
+    <ul class="dropdown-menu">
+        <li><a class="display-amt-item" href="#" data-value="10">10</a></li>
+        <li><a class="display-amt-item" href="#" data-value="25">25</a></li>
+        <li><a class="display-amt-item" href="#" data-value="50">50</a></li>
+        <li><a class="display-amt-item" href="#" data-value="100">100</a></li>
+    </ul>
+</div>
+<div id="pagination" class="text-center mt-3">
+    <button id="prevBtn" class="btn btn-primary mr-2">Previous</button>
+    <span id="pageCounter">Page 1</span>
+    <button id="nextBtn" class="btn btn-primary ml-2">Next</button>
+</div>
 <div id = "data_table" class="table-responsive">
     <table id=movie_table class="table table-striped shadow-lg rounded">
         <thead class ="thead-dark">
