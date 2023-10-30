@@ -200,10 +200,14 @@ public class MovieListServlet extends HttpServlet {
                     "            ) AS SubGenres) AS Genres, " +
                     "           (SELECT GROUP_CONCAT(CONCAT(names,'|',ids)) " +
                     "            FROM (" +
-                    "                SELECT DISTINCT s.name AS names, s.id as ids " +
-                    "                FROM stars_in_movies sim " +
-                    "                JOIN stars s ON sim.starId = s.id " +
-                    "                WHERE sim.movieId = m.id LIMIT 3" +
+                    "                    SELECT s.name AS names, s.id as ids, COUNT(sim2.starId) AS movie_count\n" +
+                    "                    FROM stars AS s\n" +
+                    "                    INNER JOIN stars_in_movies AS sim1 ON s.id = sim1.starId\n" +
+                    "                    INNER JOIN stars_in_movies AS sim2 ON sim1.starId = sim2.starId\n" +
+                    "                    WHERE sim1.movieId = m.id\n" +
+                    "                    GROUP BY s.name, s.id\n" +
+                    "                    ORDER BY movie_count DESC , names ASC\n" +
+                    "                    LIMIT 3\n" +
                     "            ) AS SubStars) AS Stars " +
                     "    FROM movies m " +
                     "    WHERE m.id IN (" +
@@ -229,10 +233,14 @@ public class MovieListServlet extends HttpServlet {
                     "            ) AS SubGenres) AS Genres, " +
                     "           (SELECT GROUP_CONCAT(CONCAT(names,'|',ids)) " +
                     "            FROM (" +
-                    "                SELECT DISTINCT s.name AS names, s.id as ids " +
-                    "                FROM stars_in_movies sim " +
-                    "                JOIN stars s ON sim.starId = s.id " +
-                    "                WHERE sim.movieId = m.id LIMIT 3" +
+                    "                    SELECT s.name AS names, s.id as ids, COUNT(sim2.starId) AS movie_count\n" +
+                    "                    FROM stars AS s\n" +
+                    "                    INNER JOIN stars_in_movies AS sim1 ON s.id = sim1.starId\n" +
+                    "                    INNER JOIN stars_in_movies AS sim2 ON sim1.starId = sim2.starId\n" +
+                    "                    WHERE sim1.movieId = m.id\n" +
+                    "                    GROUP BY s.name, s.id\n" +
+                    "                    ORDER BY movie_count DESC , names ASC\n" +
+                    "                    LIMIT 3\n" +
                     "            ) AS SubStars) AS Stars " +
                     "    FROM movies m " +
                     "    WHERE m.id IN (" +
@@ -307,13 +315,14 @@ public class MovieListServlet extends HttpServlet {
                 "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids))\n" +
                 "                FROM\n" +
                 "                    (\n" +
-                "                        SELECT DISTINCT s.name AS names, s.id AS ids\n" +
-                "                        FROM stars_in_movies sim\n" +
-                "                        JOIN stars s ON sim.starId = s.id\n" +
-                "                        WHERE sim.movieId = m.id\n" +
-//                    "                        AND\n" +
-//                    "                        (? = \'!\' OR s.name LIKE ?)\n" +
-                "                        LIMIT 3\n" +
+                "                    SELECT s.name AS names, s.id as ids, COUNT(sim2.starId) AS movie_count\n" +
+                "                    FROM stars AS s\n" +
+                "                    INNER JOIN stars_in_movies AS sim1 ON s.id = sim1.starId\n" +
+                "                    INNER JOIN stars_in_movies AS sim2 ON sim1.starId = sim2.starId\n" +
+                "                    WHERE sim1.movieId = m.id\n" +
+                "                    GROUP BY s.name, s.id\n" +
+                "                    ORDER BY movie_count DESC , names ASC\n" +
+                "                    LIMIT 3\n" +
                 "                    ) AS SubStars\n" +
                 "            ) AS Stars\n" +
                 "        FROM\n" +
@@ -385,15 +394,17 @@ public class MovieListServlet extends HttpServlet {
                 "                    ) AS SubGenres\n" +
                 "            ) AS Genres,\n" +
                 "            (\n" +
-                "                SELECT GROUP_CONCAT(CONCAT(names, '|', ids))\n" +
-                "                FROM\n" +
-                "                    (\n" +
-                "                        SELECT DISTINCT s.name AS names, s.id AS ids\n" +
-                "                        FROM stars_in_movies sim\n" +
-                "                        JOIN stars s ON sim.starId = s.id\n" +
-                "                        WHERE sim.movieId = m.id\n" +
-                "                        LIMIT 3\n" +
-                "                    ) AS SubStars\n" +
+                "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids))\n" +
+                "                FROM (\n" +
+                "                    SELECT s.name AS names, s.id as ids, COUNT(sim2.starId) AS movie_count\n" +
+                "                    FROM stars AS s\n" +
+                "                    INNER JOIN stars_in_movies AS sim1 ON s.id = sim1.starId\n" +
+                "                    INNER JOIN stars_in_movies AS sim2 ON sim1.starId = sim2.starId\n" +
+                "                    WHERE sim1.movieId = m.id\n" +
+                "                    GROUP BY s.name, s.id\n" +
+                "                    ORDER BY movie_count DESC , names ASC\n" +
+                "                    LIMIT 3\n" +
+                "                ) AS SubStars\n" +
                 "            ) AS Stars\n" +
                 "        FROM movies m\n" +
                 "        WHERE m.id IN\n" +
@@ -449,10 +460,14 @@ public class MovieListServlet extends HttpServlet {
                 "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids))\n" +
                 "                FROM\n" +
                 "                    (\n" +
-                "                        SELECT DISTINCT s.name AS names, s.id AS ids\n" +
-                "                        FROM stars_in_movies sim\n" +
-                "                        JOIN stars s ON sim.starId = s.id\n" +
-                "                        WHERE sim.movieId = m.id\n" +
+                "                    SELECT s.name AS names, s.id as ids, COUNT(sim2.starId) AS movie_count\n" +
+                "                    FROM stars AS s\n" +
+                "                    INNER JOIN stars_in_movies AS sim1 ON s.id = sim1.starId\n" +
+                "                    INNER JOIN stars_in_movies AS sim2 ON sim1.starId = sim2.starId\n" +
+                "                    WHERE sim1.movieId = m.id\n" +
+                "                    GROUP BY s.name, s.id\n" +
+                "                    ORDER BY movie_count DESC , names ASC\n" +
+                "                    LIMIT 3\n" +
                 "                        LIMIT 3\n" +
                 "                    ) AS SubStars\n" +
                 "            ) AS Stars\n" +
