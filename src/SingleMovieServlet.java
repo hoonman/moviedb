@@ -44,23 +44,11 @@ public class SingleMovieServlet extends HttpServlet {
         try (Connection conn = dataSource.getConnection()) {
             // Get a connection from dataSource
 
-            // Construct a query with parameter represented by "?"
-//            String query = " SELECT     sub.MovieId,     sub.MovieTitle,     sub.MovieYear,     sub.Director,     sub.Genres,     sub.Stars,     r.rating AS Rating FROM (     SELECT         m.id AS MovieId,         m.title AS MovieTitle,         m.year AS MovieYear,         m.director AS Director,         (SELECT GROUP_CONCAT(CONCAT(names,\"|\", ids)) FROM (SELECT DISTINCT g.name AS names, g.id as ids          FROM genres_in_movies gim          \n" +
-//                    "JOIN genres g ON gim.genreId = g.id          WHERE gim.movieId = m.id          LIMIT 3) AS SubGenres) AS Genres,       ( SELECT GROUP_CONCAT(CONCAT(names,\"|\",ids)) FROM ( SELECT DISTINCT s.name AS names, s.id as ids\n" +
-//                    "       FROM stars_in_movies  sim        JOIN stars s ON sim.starId = s.id         WHERE sim.movieId = m.id         LIMIT 3) AS SubStars) AS Stars     FROM movies m ) AS sub JOIN ratings r ON sub.MovieId = r.movieId\n" +
-//                    " ORDER BY r.rating DESC LIMIT 20;";
             String id2 = request.getParameter("id");
 
             // The log message can be found in localhost log
             request.getServletContext().log("getting id: " + id2);
-//            String query = "Select m.id as movieId, m.title as movieTitle, m.year as movieYear, m.director as movieDirector, g.name as genreName, s.name as starName, r.rating as ratingRating " +
-//                    "From movies as m " +
-//                    "JOIN genres_in_movies AS gim ON m.id = gim.movieId " +
-//                    "JOIN genres AS g on gim.genreId = g.id " +
-//                    "JOIN stars_in_movies AS sim ON m.id = sim.movieId " +
-//                    "JOIN stars AS s ON sim.starId = s.id " +
-//                    "JOIN ratings AS r ON m.id = r.movieId " +
-//                    "where m.id = ?";
+
             String query = "SELECT\n" +
                     "    sub.MovieId,\n" +
                     "    sub.MovieTitle,\n" +

@@ -1,0 +1,86 @@
+<!-- This example is following frontend and backend separation.
+
+    This .html performs two steps:
+    1. Create a html template skeleton, with all the elements defined (some left empty) and named with ids.
+    2. Load single-star.js to populate the data into empty elements.
+    -->
+
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel ="stylesheet" href="global.css"/>
+    <title>Movie List</title>
+</head>
+<body>
+<div id="navbar-container"></div>
+
+<h1 id="filter_title">Browsing</h1>
+<div class="btn-group dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="dropdown">
+        Select an Option
+    </button>
+    <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="#" data-value="RATING_DESC_TABLES_DESC">RATING DESC TABLES DESC</a></li>
+        <li><a class="dropdown-item" href="#" data-value="RATING_ASC_TABLES_DESC">RATING ASC TABLES DESC</a></li>
+        <li><a class="dropdown-item" href="#" data-value="RATING_DESC_TABLES_ASC">RATING DESC TABLES ASC</a></li>
+        <li><a class="dropdown-item" href="#" data-value="RATING_ASC_TABLES_ASC">RATING ASC TABLES ASC</a></li>
+        <li><a class="dropdown-item" href="#" data-value="TABLES_DESC_RATING_DESC">TABLES DESC RATING DESC</a></li>
+        <li><a class="dropdown-item" href="#" data-value="TABLES_ASC_RATING_DESC">TABLES DESC RATING DESC</a></li>
+        <li><a class="dropdown-item" href="#" data-value="TABLES_DESC_RATING_ASC">TABLES DESC RATING ASC </a></li>
+        <li><a class="dropdown-item" href="#" data-value="TABLES_ASC_RATING_ASC">TABLES ASC RATING ASC </a></li>
+    </ul>
+</div>
+<div class="btn-group dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="dropdown_display">
+        Select an Option
+    </button>
+    <ul class="dropdown-menu">
+        <li><a class="display-amt-item" href="#" data-value="10">10</a></li>
+        <li><a class="display-amt-item" href="#" data-value="25">25</a></li>
+        <li><a class="display-amt-item" href="#" data-value="50">50</a></li>
+        <li><a class="display-amt-item" href="#" data-value="100">100</a></li>
+    </ul>
+</div>
+<div id="pagination" class="text-center mt-3">
+    <button id="prevBtn" class="btn btn-primary mr-2">Previous</button>
+    <span id="pageCounter">Page 1</span>
+    <button id="nextBtn" class="btn btn-primary ml-2">Next</button>
+</div>
+<div id = "data_table" class="table-responsive">
+    <table id=movie_table class="table table-striped shadow-lg rounded">
+        <thead class ="thead-dark">
+        <tr>
+            <th>Movie Title</th>
+            <th>Release Year</th>
+            <th>Director</th>
+            <th>Genres</th>
+            <th>Stars</th>
+            <th>Ratings</th>
+            <th>
+        </tr>
+        </thead>
+
+        <!-- Table body is left empty here, will be populated with the data retrieved with single-star.js -->
+        <!-- single-star.js will find this html element by it's id "movie_table_body" -->
+        <tbody id=movie_table_body></tbody>
+    </table>
+</div>
+<!-- Load jQuery and Bootstrap JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<script src="browse_page.js"></script>
+<script src="search_component.js"></script>
+</body>
+
+
+</html>

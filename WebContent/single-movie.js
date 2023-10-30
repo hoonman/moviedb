@@ -39,6 +39,7 @@ function getParameterByName(target) {
 function handleResult(resultData) {
 
     console.log("handleResult: populating star info from resultData");
+    console.log(resultData);
 
     // populate the star info h3
     // find the empty h3 body by id "star_info"
@@ -51,15 +52,14 @@ function handleResult(resultData) {
     let movieTableBodyElement = jQuery("#single_movie_table_body");
     let rowHTML = "";
     rowHTML += "<tr>";
-    // rowHTML += "<th>" +'<a href="single-movie.html?id=' + resultData[0]['movie_Id'] + '">' +  resultData[0]["movie_Title"] +"</a>"+ "</th>";
-    // rowHTML += "<th>" +'<a href="single-movie.html?id=' + resultData[0]['movie_Id'] + '">' +  resultData[0]["movie_Title"] +"</a>"+ "</th>";
     rowHTML += "<th>" + resultData[0]["movie_Year"] + "</th>";
     rowHTML += "<th>" + resultData[0]["director"] + "</th>";
     rowHTML += "<th>";
 
     for(let j = 0; j< resultData[0]["genres"].length; j++){
-        rowHTML +=  resultData[0]["genres"][j]["name"] +" ";
+        rowHTML += '<a href ="browse_page.html?genreID=' + resultData[0]["genres"][j]["id"] +"&page_number=1&page_size=25"+ '">' +  resultData[0]["genres"][j]["name"] +" "+"</a>";
     }
+
     rowHTML += "</th>";
     rowHTML += "<th>";
     for(let j = 0; j< resultData[0]["stars"].length; j++){
