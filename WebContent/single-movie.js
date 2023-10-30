@@ -59,9 +59,9 @@ function handleResult(resultData) {
         }
 
     }
+    rowHTML += "<th>" + resultData[0]["rating"] + "</th>";
     rowHTML += "<th><button class='cart-button' data-movie-title='" + resultData[0]["movie_Title"] + "'>Add to Cart</button>"
     rowHTML += "</th>";
-    rowHTML += "<th>" + resultData[0]["rating"] + "</th>";
     rowHTML += "</tr>";
     movieTableBodyElement.append(rowHTML);
     $(".cart-button").click(function() {

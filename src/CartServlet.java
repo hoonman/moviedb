@@ -32,30 +32,9 @@ public class CartServlet extends HttpServlet {
         ArrayList<Movie> previousItems = (ArrayList<Movie>) session.getAttribute("previousItems");
         if (previousItems == null) {
             previousItems = new ArrayList<Movie>();
-        } else {
-            //previousItems is not null
-//            for (int i = 0; i < previousItems.size(); i++) {
-//                System.out.println(previousItems.get(i).getName());
-//                System.out.println(previousItems.get(i).getQuantity());
-//                System.out.println(previousItems.get(i).getRemove());
-//            }
         }
 
-//        String remove = request.getParameter("remove");
-//        if (remove.equals("No")) {
-//            System.out.println("something");
-//
-//        }
-
-
-        // if these are null, we need to set them to default values
-//        String item = request.getParameter("movieName");
-//        String quantity = request.getParameter("quantity");
-//        String cost = request.getParameter("cost");
-//        String remove = request.getParameter("remove");
-
         JsonArray previousItemsJsonArray = new JsonArray();
-        // replaced the lambda add with this iterative approach
         for (Movie movie : previousItems) {
             JsonObject movieJson = new JsonObject();
             movieJson.addProperty("movieName", movie.getName());
@@ -63,17 +42,7 @@ public class CartServlet extends HttpServlet {
             movieJson.addProperty("cost", movie.getCost());
             movieJson.addProperty("remove", movie.getRemove());
             if ((movie.getRemove().equals("Yes") || movie.getRemove().equals("Delete") || movie.getQuantity() == 0) && (!previousItems.isEmpty())) {
-//                System.out.println("could not populate data");
-//                if (movie.getRemove().equals("Yes")) {
-//                    System.out.println("Yes case");
-//                } else if (movie.getRemove().equals("Delete")) {
-//                    System.out.println("Delete case");
-//                } else if (movie.getQuantity() == 0) {
-//                    System.out.println("quantity case");
-//                }
                 movie.setRemove("No");
-
-
             } else {
                 previousItemsJsonArray.add(movieJson);
             }
@@ -135,13 +104,6 @@ public class CartServlet extends HttpServlet {
                     previousItems.add(newMovie);
                 }
                 session.setAttribute("previousItems", previousItems);
-//                System.out.println("after setAttribute");
-//                for (int j = 0; j < previousItems.size(); j++) {
-//                    System.out.println(previousItems.get(j).getName());
-//                    System.out.println(previousItems.get(j).getQuantity());
-//                    System.out.println(previousItems.get(j).getRemove());
-//                }
-
 
             }
         }

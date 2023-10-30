@@ -68,27 +68,6 @@ function displayData(previousItemArr) {
             quantity.text(currentQuantity - 1);
         }
 
-        // for (let i = 0; i < globalResultData2.length; i++) {
-        //     if (globalResultData2[i].movieName === movieTitle) {
-        //         let finalQuantity = globalResultData2[i].quantity - 1;
-        //         console.log("finalQuantity = ", finalQuantity);
-        //         if (currentQuantity === 0) {
-        //             console.log("the quantity is zero now we must remove");
-        //             data = {
-        //                 movieName: movieTitle,
-        //                 quantity: 1,
-        //                 cost: 30,
-        //                 remove: "Delete"
-        //             };
-        //             // data.remove = "Delete"
-        //             rowToDelete.remove();
-        //         } else {
-        //             data.remove = "Yes";
-        //             data.quantity = finalQuantity;
-        //             quantity.text(currentQuantity - 1);
-        //         }
-        //     }
-        // }
         sendPost(data);
 
     });
@@ -96,10 +75,6 @@ function displayData(previousItemArr) {
         var movieTitle = $(this).data("movie-title");
         var quantity = $(this).closest("tr").find(".quantity");
         var currentQuantity = parseInt(quantity.text());
-        var table = $(this).data("rowHTML");
-
-        // Do something with the movieTitle, e.g., add it to the cart
-        // make a ajax request to send the data
 
         let globalResultData2 = globalResultData["previousItems"];
 
@@ -117,18 +92,6 @@ function displayData(previousItemArr) {
                 quantity.text(currentQuantity + 1);
             }
         }
-
-        // $.ajax({
-        //     type: "POST",
-        //     url: "api/cart",
-        //     data: data,
-        //     success: function(response) {
-        //         console.log("Data sent to CartServlet successfully:", response);
-        //     },
-        //     error: function(err) {
-        //         console.error("Error while sending data to CartServlet:", err);
-        //     }
-        // });
         sendPost(data);
 
     });
@@ -138,8 +101,6 @@ function displayData(previousItemArr) {
         let rowToDelete = $("#cart_body tr").filter(function () {
             return $(this).find("th:first").text() === movieTitle;
         });
-        //populate the data
-
         var data = {
             movieName: movieTitle,
             quantity: 1,
@@ -148,19 +109,17 @@ function displayData(previousItemArr) {
         };
         globalResultData2 = globalResultData["previousItems"];
 
-        for (let i = 0; i < globalResultData2.length; i++) {
-            if (globalResultData2[i].movieName === movieTitle) {
-                //delete it from the record
-                // data.remove = "Delete";
-            }
-        }
         rowToDelete.remove();
         sendPost(data);
     });
-
-
-
 }
+
+$(".payment").click(function() {
+    //redirect the user to the payment page
+    window.location.href = '/cs122b_project1_api_example_war/payment.html';
+    sendPost();
+});
+
 
 
 function sendPost(data) {
