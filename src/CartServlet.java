@@ -82,11 +82,11 @@ public class CartServlet extends HttpServlet {
                     } else if (previousItems.get(i).getName().equals(item) && remove.equals("Yes")) {
                         //remove previousItems from the list and break
                         previousItems.get(i).setQuantity(previousItems.get(i).getQuantity() - 1);
-                        previousItems.get(i).setCost(previousItems.get(i).getCost());
+                        previousItems.get(i).setCost(previousItems.get(i).getCost() - Integer.parseInt(cost));
                         if (previousItems.get(i).getQuantity() == 0) {
                             previousItems.remove(i);
+                            break;
                         }
-                        break;
                     } else if (previousItems.get(i).getName().equals(item) && remove.equals("Delete")) {
                         System.out.println("does it reach the POST delete?");
                         previousItems.remove(i);

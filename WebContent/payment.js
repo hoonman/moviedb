@@ -19,6 +19,24 @@ function handleSessionData(resultDataString) {
     }
 }
 
+function handleCartData(resultDataString) {
+    let resultDataJson = JSON.parse(resultDataString);
+    let cost = resultDataJson["previousItems"];
+
+    let total_cost = 0;
+    for (let i = 0; i < cost.length; i++) {
+        // iterate through the list and add up the costs
+        total_cost += cost[i].cost;
+    }
+    console.log("total cost is: ", total_cost);
+    //need to display the cost somewhere.
+    let totalCost = $("#total_cost");
+    let res = "";
+    res += "<p> Total Cost: " + total_cost + "</p>";
+    totalCost.html("");
+    totalCost.append(res);
+}
+
 function onSubmitFunction() {
     console.log("payment is: ", payment.serialize());
     // make a post request to api/payment
@@ -45,5 +63,12 @@ $.ajax("api/payment", {
     method: "GET",
     success: handleSessionData
 });
+
+$.ajax("api/cart", {
+    method: "GET",
+    success: handleCartData
+})
+
+
 
 

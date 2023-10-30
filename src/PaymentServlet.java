@@ -17,6 +17,7 @@ import java.sql.Connection;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import java.text.SimpleDateFormat;
 
 import PayUser.PayUser;
 
@@ -95,6 +96,7 @@ public class PaymentServlet extends HttpServlet {
         String creditCardNum = request.getParameter("creditCardNum");
         String expDate = request.getParameter("expDate");
         boolean authorizer = false;
+        int lastId = 0;
         try (Connection conn = dataSource.getConnection()) {
             System.out.println("does it try? ");
 //            String query = "SELECT * from " +
@@ -122,8 +124,39 @@ public class PaymentServlet extends HttpServlet {
                     String last = rs.getString("lastName");
                     String exp = rs.getString("expiration");
 
+                    //since we have succeeded, we can now populate the data here
+                    String sql = "SELECT MAX(id) FROM sales;";
+                    ResultSet result = statement.executeQuery(sql);
+                    if (result.next()) {
+                        lastId = result.getInt(1);
+
+                    }
+                    if (authorizer == true) {
+                        int newId = lastId += 1;
+                        System.out.println("newid: " + newId);
+                        java.time.LocalDate localDate = java.time.LocalDate.parse(exp);
+                        java.sql.Date sqlDate = java.sql.Date.valueOf(localDate);
+
+                        String insertQuery = "Insert into sales (id, customerId, movieId, saleDate) Values (?, ?, ?, ?)";
+                        PreparedStatement preparedStatement = conn.prepareStatement(insertQuery);
+                        preparedStatement.setInt(1, newId);
+                        preparedStatement.setInt(2, 490001);
+                        preparedStatement.setString(3, "tt0395642");
+                        preparedStatement.setDate(4, sqlDate);
+                        int rowsAffected = preparedStatement.executeUpdate();
+                        if (rowsAffected > 0) {
+                            System.out.println("database insertion succ");
+                        } else {
+                            System.out.println("insertion failed");
+                        }
+
+                    }
                 }
-            }
+
+
+
+                }
+
         } catch (Exception e ) {
             System.out.println(e);
 
@@ -170,4 +203,9 @@ public class PaymentServlet extends HttpServlet {
 
         response.getWriter().write(responseJsonObject.toString());
     }
+
+    protected void loadDataToSales() throws IOException {
+
+    }
+
 }

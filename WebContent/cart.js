@@ -24,15 +24,16 @@ function displayData(previousItemArr) {
     for (let i = 0; i < previousItemArr.length; i++) {
         let movieName = previousItemArr[i].movieName;
         let quantity = previousItemArr[i].quantity;
-        let cost = previousItemArr[i].cost;
+        let totalCost = previousItemArr[i].cost;
+        let cost = previousItemArr[i].cost / quantity;
         let rowHTML = "<tr>";
         rowHTML += "<th>" + movieName + "</th>";
         rowHTML += "<th><button class='plus' data-movie-title='" + movieName + "'>+</button>";
         rowHTML += "<span class='quantity'>" + quantity + "</span>";
         rowHTML += "<button class='minus' data-movie-title='" + movieName + "'>-</button></th>";
         rowHTML += "<th><button class='delete' data-movie-title='" + movieName + "'> Delete </button></th>";
-        rowHTML += "<th>" + cost + "</th>";
-        rowHTML += "<th>" + cost + "</th>";
+        rowHTML += "<th class='cost'>" + cost + "</th>";
+        rowHTML += "<th class='totalCost'>" + totalCost + "</th>";
         rowHTML += "</tr>";
         rowHTML += "</tr>";
         cartTable.append(rowHTML);
@@ -42,6 +43,9 @@ function displayData(previousItemArr) {
     $(".minus").click(function() {
         var movieTitle = $(this).data("movie-title");
         var quantity = $(this).closest("tr").find(".quantity");
+        var cost= $(this).closest("tr").find(".totalCost");
+        var currentCost= parseInt(cost.text());
+        console.log("cost: ", cost.text());
         var currentQuantity = parseInt(quantity.text());
         let rowToDelete = $("#cart_body tr").filter(function () {
             return $(this).find("th:first").text() === movieTitle;
@@ -66,6 +70,7 @@ function displayData(previousItemArr) {
             data.quantity = data.quantity - 1;
             data.remove = "Yes";
             quantity.text(currentQuantity - 1);
+            cost.text(currentCost - data.cost);
         }
 
         sendPost(data);
@@ -74,7 +79,9 @@ function displayData(previousItemArr) {
     $(".plus").click(function() {
         var movieTitle = $(this).data("movie-title");
         var quantity = $(this).closest("tr").find(".quantity");
+        var cost= $(this).closest("tr").find(".totalCost");
         var currentQuantity = parseInt(quantity.text());
+        var currentCost = parseInt(cost.text());
 
         let globalResultData2 = globalResultData["previousItems"];
 
@@ -84,14 +91,9 @@ function displayData(previousItemArr) {
             cost: 30,
             remove: "No"
         };
-        for (let i = 0; i < globalResultData2.length; i++) {
-            if (globalResultData2[i].movieName === movieTitle) {
-                // increment the quantity of globalResultData[i]
-                let finalQuantity = globalResultData2[i].quantity + 1;
-                data.quantity = finalQuantity;
-                quantity.text(currentQuantity + 1);
-            }
-        }
+        data.quantity = data.quantity + 1;
+        quantity.text(currentQuantity + 1);
+        cost.text(currentCost + data.cost);
         sendPost(data);
 
     });
