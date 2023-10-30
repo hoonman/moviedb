@@ -21,7 +21,11 @@
     <title>Single Movie</title>
 </head>
 <body>
-<div id="navbar-container"></div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
@@ -34,28 +38,29 @@
     </div>
 </nav>
 
-<!--<h1>Single Movie Page</h1>-->
+<form ACTION="#" id="payment" METHOD="post">
+    <label>First Name</label>
+    <label>
+        <input name="firstName" required="required" type="text">
+    </label>
+    <label>Last Name</label>
+    <label>
+        <input name="lastName" required="required" type="text">
+    </label>
+    <label>Credit Card Number</label>
+    <label>
+        <input name="creditCardNum" required="required" type="text">
+    </label>
+    <label>Expiration Date</label>
+    <label>
+        <input name="expDate" required="required" type="text">
+    </label>
+    <input type="submit" value="proceed">
 
-<h3 id="movie_info"></h3>
-<div id = "data_table">
+</form>
+<div id="total_cost"></div>
 
-<table id=single_movie_table class="table table-striped">
-    <thead class ="thead-dark">
-    <tr>
-        <th>Year</th>
-        <th>Director</th>
-        <th>Genres</th>
-        <th>Stars</th>
-        <th>Ratings</th>
-        <th>
-    </tr>
-    </thead>
 
-    <!-- Table body is left empty here, will be populated with the data retrieved with single-star.js -->
-    <!-- single-star.js will find this html element by it's id "movie_table_body" -->
-    <tbody id=single_movie_table_body></tbody>
-</table>
-</div>
 <!-- Load jQuery and Bootstrap JS -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
@@ -65,9 +70,7 @@
 <!-- The path is relative to single-star.html, since these two files are in the same directory -->
 <!-- Note the url does not contain a "/" in the beginning, which means the url is relative to current path
      otherwise the url is relative to the root path-->
-<script src="single-movie.js"></script>
-<script src="search_component.js"></script>
-
+<script src="payment.js"></script>
 </body>
 
 
