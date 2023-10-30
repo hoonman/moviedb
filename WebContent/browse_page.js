@@ -5,8 +5,12 @@
  */
 
 let order_string = "RATING_DESC_TABLES_DESC";
+let last_page = false;
 let page_size_amt = 25;
 let page_num = 1;
+const prevButton = $("#prevBtn");
+const nextButton = $("#nextBtn");
+const pageCounter = $("#pageCounter");
 
 function getParameterByName(target) {
   // Get request URL
@@ -38,7 +42,11 @@ function handleResult(resultData) {
   // Find the empty table body by id "movie_table_body"
   let movieTableBodyElement = jQuery("#movie_table_body");
   movieTableBodyElement.empty();
-
+  if (resultData.length < page_size_amt) {
+    last_page = true;
+  } else {
+    last_page = false;
+  }
   // Concatenate the html tags with resultData jsonObject to create table rows
   for (let i = 0; i < resultData.length; i++) {
     let rowHTML = "";
@@ -86,6 +94,7 @@ function handleResult(resultData) {
     movieTableBodyElement.append(rowHTML);
   }
 }
+
 $(".dropdown-item").click(function (event) {
   event.preventDefault();
 
@@ -105,7 +114,28 @@ $(".display-amt-item").click(function (event) {
   // Make an API call based on the selected option
   populate_table(order_string, selectedNumber);
 });
+function updatePageCounter() {
+  pageCounter.text(`Page ${page_num}`);
+}
 
+prevButton.click(() => {
+  console.log("pressed prev button");
+  if (page_num > 1) {
+    page_num--;
+    updatePageCounter();
+    populate_table(order_string, page_size_amt, page_num);
+  }
+});
+
+nextButton.click(() => {
+  console.log("pressed next button");
+
+  if (!last_page) {
+    page_num++;
+    updatePageCounter();
+    populate_table(order_string, page_size_amt, page_num);
+  }
+});
 function populate_table(order, page_size_amt = null, page_num = null) {
   // Get id from URL
   let genreID = getParameterByName("genreID");
