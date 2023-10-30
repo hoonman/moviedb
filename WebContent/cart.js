@@ -20,13 +20,14 @@ function handleSessionData(resultData) {
 function displayData(previousItemArr) {
     let cartTable = $("#cart_body");
     cartTable.html("");
+    let total_cost = 0;
+    let rowHTML = "<tr>";
 
     for (let i = 0; i < previousItemArr.length; i++) {
         let movieName = previousItemArr[i].movieName;
         let quantity = previousItemArr[i].quantity;
         let totalCost = previousItemArr[i].cost;
         let cost = previousItemArr[i].cost / quantity;
-        let rowHTML = "<tr>";
         rowHTML += "<th>" + movieName + "</th>";
         rowHTML += "<th><button class='plus' data-movie-title='" + movieName + "'>+</button>";
         rowHTML += "<span class='quantity'>" + quantity + "</span>";
@@ -34,25 +35,28 @@ function displayData(previousItemArr) {
         rowHTML += "<th><button class='delete' data-movie-title='" + movieName + "'> Delete </button></th>";
         rowHTML += "<th class='cost'>" + cost + "</th>";
         rowHTML += "<th class='totalCost'>" + totalCost + "</th>";
+        total_cost += totalCost;
         rowHTML += "</tr>";
-        rowHTML += "</tr>";
-        cartTable.append(rowHTML);
 
     }
+    cartTable.append(rowHTML);
+
+    let total = $("#payment_list");
+    let rowHTML2 = "";
+    rowHTML2 += "<p class='total'> Total Cost is " + total_cost + " </p>"
+    total.append(rowHTML2);
 
     $(".minus").click(function() {
         var movieTitle = $(this).data("movie-title");
         var quantity = $(this).closest("tr").find(".quantity");
         var cost= $(this).closest("tr").find(".totalCost");
         var currentCost= parseInt(cost.text());
-        console.log("cost: ", cost.text());
         var currentQuantity = parseInt(quantity.text());
         let rowToDelete = $("#cart_body tr").filter(function () {
             return $(this).find("th:first").text() === movieTitle;
         });
-
-
-        let globalResultData2 = globalResultData["previousItems"];
+        var total = $(this).closest("p").find(".total");
+        // var grandTotal = total.text();
 
         var data = {
             movieName: movieTitle,

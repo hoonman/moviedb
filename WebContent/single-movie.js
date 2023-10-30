@@ -87,13 +87,38 @@ function handleResult(resultData) {
             data: data,
             success: function(response) {
                 console.log("Data sent to CartServlet successfully:", response);
+                alert("Item successfully added!");
             },
             error: function(err) {
                 console.error("Error while sending data to CartServlet:", err);
+                alert("Could not add to shopping cart.");
             }
         });
     });
 }
+
+let url = null;
+function handleJumpData(resultData) {
+    let resultDataJson = JSON.parse(resultData);
+    let resultDataJsonURL = resultDataJson["currURL"];
+    // find the last index
+    url = resultDataJsonURL[resultDataJsonURL.length - 1].URL;
+    console.log("url is: ", url);
+
+    if (url == null) {
+        window.location.href = '/cs122b_project1_api_example_war/browse.html';
+    } else{
+        window.location.href = url;
+    }
+
+}
+
+$("#jump_button").click(function() {
+    $.ajax("api/jump", {
+        method: "GET",
+        success: handleJumpData
+    });
+})
 
 
 /**

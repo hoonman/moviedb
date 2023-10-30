@@ -12,6 +12,10 @@ jQuery(document).ready(function () {
   navHTML +=
     '<a class="nav-link" aria-current="page" href="browse_page.html">Movie List</a>';
   navHTML += "</li>";
+  navHTML += '<li class="nav-item">';
+  navHTML +=
+      '<a class="nav-link" aria-current="page" href="cart.html">Checkout</a>';
+  navHTML += "</li>";
   navHTML += "</ul>";
 
   navHTML += '<form id="search-form" class="form-inline ml-auto">';

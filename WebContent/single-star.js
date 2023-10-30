@@ -95,3 +95,26 @@ jQuery.ajax({
     url: "api/single-star?id=" + starId, // Setting request url, which is mapped by StarsServlet in Stars.java
     success: (resultData) => handleResult(resultData) // Setting callback function to handle data returned successfully by the SingleStarServlet
 });
+
+let url = null;
+function handleJumpData(resultData) {
+    let resultDataJson = JSON.parse(resultData);
+    let resultDataJsonURL = resultDataJson["currURL"];
+    // find the last index
+    url = resultDataJsonURL[resultDataJsonURL.length - 1].URL;
+    console.log("url is: ", url);
+
+    if (url == null) {
+        window.location.href = '/cs122b_project1_api_example_war/browse.html';
+    } else{
+        window.location.href = url;
+    }
+
+}
+
+$("#jump_button").click(function() {
+    $.ajax("api/jump", {
+        method: "GET",
+        success: handleJumpData
+    });
+})

@@ -16,6 +16,9 @@ function handleSessionData(resultDataString) {
         alert("invalid data!");
     } else {
         alert("payment processed");
+        // redirect to confirmation.html. store
+        window.location.href = "/cs122b_project1_api_example_war/confirmation.html";
+
     }
 }
 

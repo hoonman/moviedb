@@ -49,6 +49,137 @@ public class SingleMovieServlet extends HttpServlet {
             // The log message can be found in localhost log
             request.getServletContext().log("getting id: " + id2);
 
+//            String query = "SELECT\n" +
+//                    "    sub.MovieId,\n" +
+//                    "    sub.MovieTitle,\n" +
+//                    "    sub.MovieYear,\n" +
+//                    "    sub.Director,\n" +
+//                    "    sub.Genres,\n" +
+//                    "    sub.Stars,\n" +
+//                    "    r.rating AS Rating\n" +
+//                    "FROM\n" +
+//                    "    (\n" +
+//                    "        SELECT\n" +
+//                    "            m.id AS MovieId,\n" +
+//                    "            m.title AS MovieTitle,\n" +
+//                    "            m.year AS MovieYear,\n" +
+//                    "            m.director AS Director,\n" +
+//                    "            (\n" +
+//                    "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids))\n" +
+//                    "                FROM (\n" +
+//                    "                    SELECT DISTINCT g.name AS names, g.id as ids\n" +
+//                    "                    FROM genres_in_movies gim\n" +
+//                    "                    JOIN genres g ON gim.genreId = g.id\n" +
+//                    "                    WHERE gim.movieId = m.id\n" +
+//                    "                ) AS SubGenres\n" +
+//                    "            ) AS Genres,\n" +
+//                    "            (\n" +
+//                    "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids))\n" +
+//                    "                FROM (\n" +
+//                    "                    SELECT DISTINCT s.name AS names, s.id as ids\n" +
+//                    "                    FROM stars_in_movies sim\n" +
+//                    "                    JOIN stars s ON sim.starId = s.id\n" +
+//                    "                    WHERE sim.movieId = m.id\n" +
+//                    "                ) AS SubStars\n" +
+//                    "            ) AS Stars\n" +
+//                    "        FROM\n" +
+//                    "            movies m\n" +
+//                    "        WHERE\n" +
+//                    "            m.id = ?\n" +
+//                    "    ) AS sub\n" +
+//                    "JOIN ratings r ON sub.MovieId = r.movieId\n" +
+//                    "ORDER BY\n" +
+//                    "    r.rating DESC\n" +
+//                    "LIMIT 20;\n";
+
+            String quer2y = "SELECT\n" +
+                    "    sub.MovieId,\n" +
+                    "    sub.MovieTitle,\n" +
+                    "    sub.MovieYear,\n" +
+                    "    sub.Director,\n" +
+                    "    sub.Genres,\n" +
+                    "    sub.Stars,\n" +
+                    "    r.rating AS Rating\n" +
+                    "FROM\n" +
+                    "    (\n" +
+                    "        SELECT\n" +
+                    "            m.id AS MovieId,\n" +
+                    "            m.title AS MovieTitle,\n" +
+                    "            m.year AS MovieYear,\n" +
+                    "            m.director AS Director,\n" +
+                    "            (\n" +
+                    "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids) ORDER BY names ASC)\n" +
+                    "                FROM (\n" +
+                    "                    SELECT DISTINCT g.name AS names, g.id as ids\n" +
+                    "                    FROM genres_in_movies gim\n" +
+                    "                    JOIN genres g ON gim.genreId = g.id\n" +
+                    "                    WHERE gim.movieId = m.id\n" +
+                    "                ) AS SubGenres\n" +
+                    "            ) AS Genres,\n" +
+                    "            (\n" +
+                    "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids) ORDER BY names ASC)\n" +
+                    "                FROM (\n" +
+                    "                    SELECT DISTINCT s.name AS names, s.id as ids\n" +
+                    "                    FROM stars_in_movies sim\n" +
+                    "                    JOIN stars s ON sim.starId = s.id\n" +
+                    "                    WHERE sim.movieId = m.id\n" +
+                    "                ) AS SubStars\n" +
+                    "            ) AS Stars\n" +
+                    "        FROM\n" +
+                    "            movies m\n" +
+                    "        WHERE\n" +
+                    "            m.id = ?\n" +
+                    "    ) AS sub\n" +
+                    "JOIN ratings r ON sub.MovieId = r.movieId\n" +
+                    "ORDER BY\n" +
+                    "    sub.MovieTitle ASC\n" +
+                    "LIMIT 20;";
+
+            String query3 = "SELECT\n" +
+                    "    sub.MovieId,\n" +
+                    "    sub.MovieTitle,\n" +
+                    "    sub.MovieYear,\n" +
+                    "    sub.Director,\n" +
+                    "    sub.Genres,\n" +
+                    "    sub.Stars,\n" +
+                    "    r.rating AS Rating\n" +
+                    "FROM\n" +
+                    "    (\n" +
+                    "        SELECT\n" +
+                    "            m.id AS MovieId,\n" +
+                    "            m.title AS MovieTitle,\n" +
+                    "            m.year AS MovieYear,\n" +
+                    "            m.director AS Director,\n" +
+                    "            (\n" +
+                    "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids) ORDER BY names ASC)\n" +
+                    "                FROM (\n" +
+                    "                    SELECT DISTINCT g.name AS names, g.id AS ids\n" +
+                    "                    FROM genres_in_movies gim\n" +
+                    "                    JOIN genres g ON gim.genreId = g.id\n" +
+                    "                    WHERE gim.movieId = m.id\n" +
+                    "                ) AS SubGenres\n" +
+                    "            ) AS Genres,\n" +
+                    "            (\n" +
+                    "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids) ORDER BY names ASC)\n" +
+                    "                FROM (\n" +
+                    "                    SELECT s.name AS names, s.id AS ids, COUNT(*) AS MovieCount\n" +
+                    "                    FROM stars_in_movies sim\n" +
+                    "                    JOIN stars s ON sim.starId = s.id\n" +
+                    "                    WHERE sim.movieId = m.id\n" +
+                    "                    GROUP BY s.id\n" +
+                    "                    ORDER BY MovieCount DESC  -- Sort by the number of movies played in\n" +
+                    "                ) AS SubStars\n" +
+                    "            ) AS Stars\n" +
+                    "        FROM\n" +
+                    "            movies m\n" +
+                    "        WHERE\n" +
+                    "            m.id = ?\n" +
+                    "    ) AS sub\n" +
+                    "JOIN ratings r ON sub.MovieId = r.movieId\n" +
+                    "ORDER BY\n" +
+                    "    sub.MovieTitle ASC\n" +
+                    "LIMIT 20;\n";
+
             String query = "SELECT\n" +
                     "    sub.MovieId,\n" +
                     "    sub.MovieTitle,\n" +
@@ -65,18 +196,18 @@ public class SingleMovieServlet extends HttpServlet {
                     "            m.year AS MovieYear,\n" +
                     "            m.director AS Director,\n" +
                     "            (\n" +
-                    "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids))\n" +
+                    "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids) ORDER BY names ASC)\n" +
                     "                FROM (\n" +
-                    "                    SELECT DISTINCT g.name AS names, g.id as ids\n" +
+                    "                    SELECT DISTINCT g.name AS names, g.id AS ids\n" +
                     "                    FROM genres_in_movies gim\n" +
                     "                    JOIN genres g ON gim.genreId = g.id\n" +
                     "                    WHERE gim.movieId = m.id\n" +
                     "                ) AS SubGenres\n" +
                     "            ) AS Genres,\n" +
                     "            (\n" +
-                    "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids))\n" +
+                    "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids) ORDER BY names ASC)\n" +
                     "                FROM (\n" +
-                    "                    SELECT DISTINCT s.name AS names, s.id as ids\n" +
+                    "                    SELECT s.name AS names, s.id AS ids\n" +
                     "                    FROM stars_in_movies sim\n" +
                     "                    JOIN stars s ON sim.starId = s.id\n" +
                     "                    WHERE sim.movieId = m.id\n" +
@@ -89,10 +220,8 @@ public class SingleMovieServlet extends HttpServlet {
                     "    ) AS sub\n" +
                     "JOIN ratings r ON sub.MovieId = r.movieId\n" +
                     "ORDER BY\n" +
-                    "    r.rating DESC\n" +
+                    "    (SELECT COUNT(*) FROM stars_in_movies sim WHERE sim.starId = sub.Stars) DESC, sub.MovieTitle ASC\n" +
                     "LIMIT 20;\n";
-
-
             PreparedStatement statement = conn.prepareStatement(query);
 
             // Perform the query
