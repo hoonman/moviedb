@@ -21,11 +21,7 @@
     <title>Single Movie</title>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-
+<div id="navbar-container"></div>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
@@ -39,9 +35,6 @@
 </nav>
 
 <!--<h1>Single Movie Page</h1>-->
-
-<!-- H3 body is left empty here, will be populated with the data retrieved with single-star.js -->
-<!-- single-star.js will find this html element by it's id "star_info" -->
 
 <h3 id="movie_info"></h3>
 <div id = "data_table">
@@ -73,6 +66,8 @@
 <!-- Note the url does not contain a "/" in the beginning, which means the url is relative to current path
      otherwise the url is relative to the root path-->
 <script src="single-movie.js"></script>
+<script src="search_component.js"></script>
+
 </body>
 
 

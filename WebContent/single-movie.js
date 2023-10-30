@@ -46,8 +46,9 @@ function handleResult(resultData) {
     rowHTML += "<th>" + resultData[0]["director"] + "</th>";
     rowHTML += "<th>";
     for(let j = 0; j< resultData[0]["genres"].length; j++){
-        rowHTML +=  resultData[0]["genres"][j]["name"] +" ";
+        rowHTML += '<a href ="browse_page.html?genreID=' + resultData[0]["genres"][j]["id"] +"&page_number=1&page_size=25"+ '">' +  resultData[0]["genres"][j]["name"] +" "+"</a>";
     }
+
     rowHTML += "</th>";
     rowHTML += "<th>";
     for(let j = 0; j< resultData[0]["stars"].length; j++){
