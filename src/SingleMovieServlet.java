@@ -207,10 +207,13 @@ public class SingleMovieServlet extends HttpServlet {
                     "            (\n" +
                     "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids) ORDER BY names ASC)\n" +
                     "                FROM (\n" +
-                    "                    SELECT s.name AS names, s.id AS ids\n" +
-                    "                    FROM stars_in_movies sim\n" +
-                    "                    JOIN stars s ON sim.starId = s.id\n" +
-                    "                    WHERE sim.movieId = m.id\n" +
+                    "                    SELECT s.name AS names, s.id as ids, COUNT(sim2.starId) AS movie_count\n" +
+                    "                    FROM stars AS s\n" +
+                    "                    INNER JOIN stars_in_movies AS sim1 ON s.id = sim1.starId\n" +
+                    "                    INNER JOIN stars_in_movies AS sim2 ON sim1.starId = sim2.starId\n" +
+                    "                    WHERE sim1.movieId = m.id\n" +
+                    "                    GROUP BY s.name, s.id\n" +
+                    "                    ORDER BY movie_count DESC, names ASC\n" +
                     "                ) AS SubStars\n" +
                     "            ) AS Stars\n" +
                     "        FROM\n" +
@@ -222,6 +225,7 @@ public class SingleMovieServlet extends HttpServlet {
                     "ORDER BY\n" +
                     "    (SELECT COUNT(*) FROM stars_in_movies sim WHERE sim.starId = sub.Stars) DESC, sub.MovieTitle ASC\n" +
                     "LIMIT 20;\n";
+
             PreparedStatement statement = conn.prepareStatement(query);
 
             // Perform the query
