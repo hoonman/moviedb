@@ -122,7 +122,7 @@ function displayData(previousItemArr) {
 
 $(".payment").click(function() {
     //redirect the user to the payment page
-    window.location.href = '/cs122b_project1_api_example_war/payment.html';
+    window.location.href = '/cs122b-project1-api-example/payment.html';
     sendPost();
 });
 
