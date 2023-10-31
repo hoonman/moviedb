@@ -468,7 +468,6 @@ public class MovieListServlet extends HttpServlet {
                 "                    GROUP BY s.name, s.id\n" +
                 "                    ORDER BY movie_count DESC , names ASC\n" +
                 "                    LIMIT 3\n" +
-                "                        LIMIT 3\n" +
                 "                    ) AS SubStars\n" +
                 "            ) AS Stars\n" +
                 "        FROM\n" +
