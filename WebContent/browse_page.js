@@ -13,19 +13,19 @@ const nextButton = $("#nextBtn");
 const pageCounter = $("#pageCounter");
 
 function getParameterByName(target) {
-  // Get request URL
-  let url = window.location.href;
-  // Encode target parameter name to url encoding
-  target = target.replace(/[\[\]]/g, "\\$&");
+    // Get request URL
+    let url = window.location.href;
+    // Encode target parameter name to url encoding
+    target = target.replace(/[\[\]]/g, "\\$&");
 
-  // Ues regular expression to find matched parameter value
-  let regex = new RegExp("[?&]" + target + "(=([^&#]*)|&|#|$)"),
-    results = regex.exec(url);
-  if (!results) return null;
-  if (!results[2]) return "";
+    // Ues regular expression to find matched parameter value
+    let regex = new RegExp("[?&]" + target + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return "";
 
-  // Return the decoded parameter value
-  return decodeURIComponent(results[2].replace(/\+/g, " "));
+    // Return the decoded parameter value
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
 /**
@@ -34,95 +34,98 @@ function getParameterByName(target) {
  */
 
 function handleResult(resultData) {
-  console.log("handleResult: populating star info from resultData");
+    console.log("handleResult: populating star info from resultData");
 
-  console.log(resultData);
+    console.log(resultData);
 
-  // Populate the star table
-  // Find the empty table body by id "movie_table_body"
-  let movieTableBodyElement = jQuery("#movie_table_body");
-  movieTableBodyElement.empty();
-  if (resultData.length < page_size_amt) {
-    last_page = true;
-  } else {
-    last_page = false;
-  }
-  // Concatenate the html tags with resultData jsonObject to create table rows
-  for (let i = 0; i < resultData.length; i++) {
-    let rowHTML = "";
-    rowHTML += '<tr class="table-default">';
-    rowHTML +=
-      "<th>" +
-      '<a href="single-movie.html?id=' +
-      resultData[i]["movie_Id"] +
-      '">' +
-      resultData[i]["movie_Title"] +
-      "</a>" +
-      "</th>";
-    rowHTML += "<th>" + resultData[i]["movie_Year"] + "</th>";
-    rowHTML += "<th>" + resultData[i]["director"] + "</th>";
-    rowHTML += "<th>";
-
-    for (let j = 0; j < resultData[i]["genres"].length; j++) {
-      rowHTML +=
-        '<a href ="browse_page.html?genreID=' +
-        resultData[i]["genres"][j]["id"] +
-        "&page_number=1&page_size=25" +
-        '">' +
-        resultData[i]["genres"][j]["name"] +
-        " " +
-        "</a>";
+    // Populate the star table
+    // Find the empty table body by id "movie_table_body"
+    let movieTableBodyElement = jQuery("#movie_table_body");
+    movieTableBodyElement.empty();
+    if (resultData.length < page_size_amt) {
+        last_page = true;
+    } else {
+        last_page = false;
     }
-    rowHTML += "</th>";
+    // Concatenate the html tags with resultData jsonObject to create table rows
+    for (let i = 0; i < resultData.length; i++) {
+        let rowHTML = "";
+        rowHTML += '<tr class="table-default">';
+        rowHTML +=
+            "<th>" +
+            '<a href="single-movie.html?id=' +
+            resultData[i]["movie_Id"] +
+            '">' +
+            resultData[i]["movie_Title"] +
+            "</a>" +
+            "</th>";
+        rowHTML += "<th>" + resultData[i]["movie_Year"] + "</th>";
+        rowHTML += "<th>" + resultData[i]["director"] + "</th>";
+        rowHTML += "<th>";
 
-    rowHTML += "<th>";
+        for (let j = 0; j < resultData[i]["genres"].length; j++) {
+            rowHTML +=
+                '<a href ="browse_page.html?genreID=' +
+                resultData[i]["genres"][j]["id"] +
+                "&page_number=1&page_size=25" +
+                '">' +
+                resultData[i]["genres"][j]["name"] +
+                " " +
+                "</a>";
+        }
+        rowHTML += "</th>";
 
-    for (let j = 0; j < resultData[i]["stars"].length; j++) {
-      rowHTML +=
-        '<a href ="single-star.html?id=' +
-        resultData[i]["stars"][j]["id"] +
-        '">' +
-        resultData[i]["stars"][j]["name"] +
-        " " +
-        "</a>";
+        rowHTML += "<th>";
+
+        for (let j = 0; j < resultData[i]["stars"].length; j++) {
+            rowHTML +=
+                '<a href ="single-star.html?id=' +
+                resultData[i]["stars"][j]["id"] +
+                '">' +
+                resultData[i]["stars"][j]["name"] +
+                " " +
+                "</a>";
+        }
+        rowHTML += "</th>";
+        rowHTML += "<th>" + resultData[i]["rating"] + "</th>";
+        rowHTML +=
+            "<th><button class='cart-button' data-movie-title='" +
+            resultData[i]["movie_Title"] +
+            "'>Add to Cart</button>";
+        rowHTML += "</th>";
+        rowHTML += "</tr>";
+        movieTableBodyElement.append(rowHTML);
+
+        // Append the row created to the table body, which will refresh the page
     }
-    rowHTML += "</th>";
-    rowHTML += "<th>" + resultData[i]["rating"] + "</th>";
-    rowHTML +=
-      "<th><button class='cart-button' data-movie-title='" +
-      resultData[i]["movie_Title"] +
-      "'>Add to Cart</button>";
-    rowHTML += "</th>";
-    rowHTML += "</tr>";
-    movieTableBodyElement.append(rowHTML);
+    $(".cart-button").click(function () {
+        // Access the "data-movie-title" attribute of the clicked button
+        var movieTitle = $(this).data("movie-title");
 
-    // Append the row created to the table body, which will refresh the page
-  }
-  $(".cart-button").click(function () {
-    // Access the "data-movie-title" attribute of the clicked button
-    var movieTitle = $(this).data("movie-title");
+        // Do something with the movieTitle, e.g., add it to the cart
+        console.log("Movie Title: " + movieTitle);
+        // make a ajax request to send the data
+        var data = {
+            movieName: movieTitle,
+            quantity: 1,
+            cost: 30,
+            remove: "No",
+        };
 
-    // Do something with the movieTitle, e.g., add it to the cart
-    console.log("Movie Title: " + movieTitle);
-    // make a ajax request to send the data
-    var data = {
-      movieName: movieTitle,
-      quantity: 1,
-      cost: 30,
-      remove: "No",
-    };
+        console.log("data looks like: ", data);
 
-    console.log("data looks like: ", data);
-
-    $.ajax({
-      type: "POST",
-      url: "api/cart",
-      data: data,
-      success: function (response) {
-        console.log("Data sent to CartServlet successfully:", response);
+        $.ajax({
+            type: "POST",
+            url: "api/cart",
+            data: data,
+            success: function (response) {
+                console.log("Data sent to CartServlet successfully:", response);
+                alert("Item successfully added!");
       },
       error: function (err) {
         console.error("Error while sending data to CartServlet:", err);
+        alert("Could not add to the shopping cart.");
+
       },
     });
   });

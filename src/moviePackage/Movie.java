@@ -5,11 +5,13 @@ public class Movie {
     private int quantity;
     private int cost;
     private String remove;
-    public Movie(String m,int q,int c, String r) {
+    private String movieId;
+    public Movie(String m,int q,int c, String r, String mid) {
         this.movieName = m;
         this.quantity = q;
         this.cost = c;
         this.remove = r;
+        this.movieId = mid;
     }
 
     public String getName() {
@@ -24,6 +26,9 @@ public class Movie {
     public String getRemove() {
         return this.remove;
     }
+    public String getMovieId() {return this.movieId;}
+
+    public void setMovieId(String mid) {this.movieId = mid;}
 
     public void setName(String name) {
         this.movieName = name;

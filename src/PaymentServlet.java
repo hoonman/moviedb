@@ -41,7 +41,6 @@ public class PaymentServlet extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        System.out.println("do get");
         HttpSession session = request.getSession();
         String sessionId = session.getId(); //get unique id
         long lastAccessTime = session.getLastAccessedTime(); //get last access time
@@ -52,10 +51,11 @@ public class PaymentServlet extends HttpServlet {
         responseJsonObject.addProperty("sessionID", sessionId);
         responseJsonObject.addProperty("lastAccessTime", new Date(lastAccessTime).toString());
 
-        String firstName = request.getParameter("firstName");
-        String lastName = request.getParameter("lastName");
-        String creditCardNum = request.getParameter("creditCardNum");
-        String expDate = request.getParameter("expDate");
+//        String firstName = request.getParameter("firstName");
+//        String lastName = request.getParameter("lastName");
+//        String creditCardNum = request.getParameter("creditCardNum");
+//        String expDate = request.getParameter("expDate");
+//        String saleId = request.getParameter("saleId");
 
         //list of items from the session (shopping cart)
         // cast it to an array of strings
@@ -73,6 +73,8 @@ public class PaymentServlet extends HttpServlet {
             payJson.addProperty("creditCardNum", item.getCardNumber());
             payJson.addProperty("expDate", item.getExpDate());
             payJson.addProperty("authorized", item.getAuthorized());
+            payJson.addProperty("movieId", item.getMovieId());
+            payJson.addProperty("saleId", item.getSaleId());
 
             previousItemsJsonArray.add(payJson);
 
@@ -95,19 +97,14 @@ public class PaymentServlet extends HttpServlet {
         String lastName = request.getParameter("lastName");
         String creditCardNum = request.getParameter("creditCardNum");
         String expDate = request.getParameter("expDate");
+        String movieId = request.getParameter("movieId");
+        String saleId = request.getParameter("saleId");
+        System.out.println("####In servlet saleId: " + saleId);
         boolean authorizer = false;
         int lastId = 0;
         try (Connection conn = dataSource.getConnection()) {
-            System.out.println("does it try? ");
-//            String query = "SELECT * from " +
-//                    "FROM creditcards\n" +
-//                    "WHERE id = ? AND firstName = ? AND lastName = ? AND creditcard = ? AND expiration = ?\n"
-
             String query = "SELECT * from creditcards where id = ? AND firstName = ? and lastName = ? and expiration = ?";
-//            String query = "SELECT * from creditcards as credit" +
-//                    "where credit.id = ? and credit.firstName = ? and credit.lastName = ? and credit.expiration = ?";
             try (PreparedStatement statement = conn.prepareStatement(query)) {
-                System.out.println("does it try 2");
                 statement.setString(1, creditCardNum);
                 statement.setString(2, firstName);
                 statement.setString(3, lastName);
@@ -129,19 +126,35 @@ public class PaymentServlet extends HttpServlet {
                     ResultSet result = statement.executeQuery(sql);
                     if (result.next()) {
                         lastId = result.getInt(1);
+                    }
 
+                    String sql2 = "SELECT id AS movieId\n" +
+                            "FROM movies\n" +
+                            "WHERE title = ?";
+                    PreparedStatement statement2 =  conn.prepareStatement(sql2);
+                    statement2.setString(1, movieId);
+                    ResultSet resultSet2 = statement2.executeQuery();
+                    String finalMovieId = "";
+                    while (resultSet2.next()) {
+                        finalMovieId = resultSet2.getString("movieId");
                     }
                     if (authorizer == true) {
                         int newId = lastId += 1;
+                        saleId = Integer.toString(newId);
                         System.out.println("newid: " + newId);
-                        java.time.LocalDate localDate = java.time.LocalDate.parse(exp);
+//                        java.time.LocalDate localDate = java.time.LocalDate.parse(exp);
+//                        java.sql.Date sqlDate = java.sql.Date.valueOf(localDate);
+                        java.time.LocalDate localDate = java.time.LocalDate.now();
                         java.sql.Date sqlDate = java.sql.Date.valueOf(localDate);
 
                         String insertQuery = "Insert into sales (id, customerId, movieId, saleDate) Values (?, ?, ?, ?)";
                         PreparedStatement preparedStatement = conn.prepareStatement(insertQuery);
                         preparedStatement.setInt(1, newId);
-                        preparedStatement.setInt(2, 490001);
-                        preparedStatement.setString(3, "tt0395642");
+                        System.out.println("integer parse int: " + Integer.parseInt(card));
+                        preparedStatement.setInt(2, Integer.parseInt(card));
+//                        preparedStatement.setString(3, "tt0395642");
+                        preparedStatement.setString(3, finalMovieId);
+                        System.out.println("final movie id is: " + finalMovieId);
                         preparedStatement.setDate(4, sqlDate);
                         int rowsAffected = preparedStatement.executeUpdate();
                         if (rowsAffected > 0) {
@@ -152,9 +165,6 @@ public class PaymentServlet extends HttpServlet {
 
                     }
                 }
-
-
-
                 }
 
         } catch (Exception e ) {
@@ -170,7 +180,7 @@ public class PaymentServlet extends HttpServlet {
         if (previousItems == null) {
             previousItems = new ArrayList<PayUser>();
 
-            PayUser currUser = new PayUser(firstName, lastName, creditCardNum, expDate, authorizer);
+            PayUser currUser = new PayUser(firstName, lastName, creditCardNum, expDate, authorizer, movieId, saleId);
 //            previousItems.add(item);
             previousItems.add(currUser);
             session.setAttribute("payUser", previousItems);
@@ -179,7 +189,8 @@ public class PaymentServlet extends HttpServlet {
             // will only be executed by one thread at a time
             synchronized (previousItems) {
 //                previousItems.add();
-                PayUser currUser = new PayUser(firstName, lastName, creditCardNum, expDate, authorizer);
+//                previousItems.clear();
+                PayUser currUser = new PayUser(firstName, lastName, creditCardNum, expDate, authorizer, movieId, saleId);
 //            previousItems.add(item);
                 previousItems.add(currUser);
                 session.setAttribute("payUser", previousItems);
@@ -199,13 +210,11 @@ public class PaymentServlet extends HttpServlet {
             payJson.addProperty("creditCardNum", item.getCardNumber());
             payJson.addProperty("expDate", item.getExpDate());
             payJson.addProperty("authorized", item.getAuthorized());
+            payJson.addProperty("movieId", item.getMovieId());
+            item.setSaleId(saleId);
+            payJson.addProperty("saleId", item.getSaleId());
         }
 
         response.getWriter().write(responseJsonObject.toString());
     }
-
-    protected void loadDataToSales() throws IOException {
-
-    }
-
 }

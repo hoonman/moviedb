@@ -41,6 +41,7 @@ public class CartServlet extends HttpServlet {
             movieJson.addProperty("quantity", movie.getQuantity());
             movieJson.addProperty("cost", movie.getCost());
             movieJson.addProperty("remove", movie.getRemove());
+            movieJson.addProperty("movieId", movie.getMovieId());
             if ((movie.getRemove().equals("Yes") || movie.getRemove().equals("Delete") || movie.getQuantity() == 0) && (!previousItems.isEmpty())) {
                 movie.setRemove("No");
             } else {
@@ -62,6 +63,7 @@ public class CartServlet extends HttpServlet {
         String quantity = request.getParameter("quantity");
         String cost = request.getParameter("cost");
         String remove = request.getParameter("remove");
+        String movieId = request.getParameter("movieId");
 
         HttpSession session = request.getSession();
         boolean movieExists = false;
@@ -69,7 +71,7 @@ public class CartServlet extends HttpServlet {
         ArrayList<Movie> previousItems = (ArrayList<Movie>) session.getAttribute("previousItems");
         if (previousItems == null) {
             previousItems = new ArrayList<Movie>();
-            Movie singleMovie = new Movie(item, Integer.parseInt(quantity), Integer.parseInt(cost), remove);
+            Movie singleMovie = new Movie(item, Integer.parseInt(quantity), Integer.parseInt(cost), remove, movieId);
             previousItems.add(singleMovie);
             session.setAttribute("previousItems", previousItems);
         } else {
@@ -100,7 +102,7 @@ public class CartServlet extends HttpServlet {
                     }
                 }
                 if (!movieExists && remove.equals("No")) {
-                    Movie newMovie = new Movie(item, Integer.parseInt(quantity), Integer.parseInt(cost), remove);
+                    Movie newMovie = new Movie(item, Integer.parseInt(quantity), Integer.parseInt(cost), remove, movieId);
                     previousItems.add(newMovie);
                 }
                 session.setAttribute("previousItems", previousItems);
@@ -116,6 +118,7 @@ public class CartServlet extends HttpServlet {
             movieJson.addProperty("quantity", movie.getQuantity());
             movieJson.addProperty("cost", movie.getCost());
             movieJson.addProperty("remove", movie.getRemove());
+            movieJson.addProperty("movieId", movie.getMovieId());
             if (movie.getQuantity() != 0) {
                 previousItemsJsonArray.add(movieJson);
             }

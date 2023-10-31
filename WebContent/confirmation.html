@@ -10,6 +10,25 @@
     <link rel ="stylesheet" href="global.css"/>
 
     <title>Single Movie</title>
+    <style>
+        h3 {
+            text-align: center;
+        }
+        ul {
+            text-align: center; /* Center-align the list items horizontally */
+            padding: 0; /* Remove default padding for the list */
+        }
+
+        li {
+            display: list-item; /* Display list items as list items (to retain bullet points) */
+            margin: 0; /* Remove any margin that causes extra space around list items */
+            padding: 0; /* Remove padding for the list items */
+            font-size: 20px; /* Adjust the font size as needed */
+        }
+        p {
+            font-size: 25px;
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -29,7 +48,8 @@
     </div>
 </nav>
 
-<h3 id="movie_info"></h3>
+<h3 id="movie_info">Your Receipt</h3>
+<div id="saleId_list"></div>
 
 <p id="sessionID"></p>
 <p id="lastAccessTime"></p>
