@@ -1,7 +1,7 @@
 # CS 122B Project 2 Team Ja # 
 
 Demo video URL of Project 1: https://www.youtube.com/watch?v=Tv-3f4Oi3nE 
-Demo video URL of Project 2:
+Demo video URL of Project 2: https://youtu.be/yCj33M3dh3I 
 
 **Substring Matching Design**
 We used the Like/ILike predicate in the MovieListServlet. We used it for constructing SQL queries for searching movies based on various criteria.
