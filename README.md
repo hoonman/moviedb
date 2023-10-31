@@ -13,7 +13,9 @@ We also used ILIKE to perform case-insensitive search.
 Jason:
 * CSS Styling
 * Movielist/Index Servlet & html page
+* Login, Search and Browse, Extend movie list, sorting, previous/next, extend single page.
 
 Jaehoon:
 * Single Movie Servlet & html
 * Single Star html
+* CSS Styling, jump functionality, shopping cart, payment, and confirmation.
