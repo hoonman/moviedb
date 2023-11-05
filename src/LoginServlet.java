@@ -45,7 +45,7 @@ public class LoginServlet extends HttpServlet {
         JsonObject responseJsonObject = new JsonObject();
         PrintWriter out = response.getWriter();
         String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
-        System.out.println("####loginservlet: recaptcharesponse: " + gRecaptchaResponse);
+//        System.out.println("####loginservlet: recaptcharesponse: " + gRecaptchaResponse);
 
 
 
