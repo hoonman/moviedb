@@ -14,6 +14,8 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.DriverManager;
+import java.sql.Statement;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/api/login")
 public class LoginServlet extends HttpServlet {
@@ -32,6 +34,8 @@ public class LoginServlet extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        // recaptcha code begins here
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
@@ -40,6 +44,9 @@ public class LoginServlet extends HttpServlet {
         */
         JsonObject responseJsonObject = new JsonObject();
         PrintWriter out = response.getWriter();
+        String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
+        System.out.println("####loginservlet: recaptcharesponse: " + gRecaptchaResponse);
+
 
 
         try (Connection conn = dataSource.getConnection()) {
@@ -67,7 +74,18 @@ public class LoginServlet extends HttpServlet {
             rs.close();
             statement.close();
 
-            if (valid_email && correct_password) {
+            boolean captchaSuccess = false;
+
+            try {
+                RecaptchaVerifyUtils.verify(gRecaptchaResponse);
+                // set the status as success
+                captchaSuccess = true;
+
+            } catch (Exception e) {
+                // fill the data in as status failed
+                captchaSuccess = false;
+            }
+            if (valid_email && correct_password && captchaSuccess) {
                 // Login success:
 
                 // set this user into the session
@@ -108,6 +126,8 @@ public class LoginServlet extends HttpServlet {
         } finally {
             out.close();
         }
+
+
 
     }
 }

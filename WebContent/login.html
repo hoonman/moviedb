@@ -16,6 +16,7 @@
             text-align: center;
         }
     </style>
+    <script src="https://www.google.com/recaptcha/api.js"></script>
 
 </head>
 
@@ -43,6 +44,9 @@
                     </label>
                 </div>
                 <input class="btn btn-primary btn-block" type="submit" value="Login">
+                <div class="g-recaptcha"
+                     data-sitekey = "6LdT4_MoAAAAAIaBLYB_VA1hi-NzyMoIdX82mpgi">
+                </div>
             </form>
             <div class="alert alert-danger mt-3" id="login_error_message">
             </div>
