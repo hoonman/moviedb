@@ -7,21 +7,25 @@ let login_form = $("#login_form");
 function handleLoginResult(resultDataString) {
     let resultDataJson = JSON.parse(resultDataString);
 
-    console.log("handle login response");
-    console.log(resultDataJson);
-    console.log(resultDataJson["status"]);
+    console.log("recaptcha status: ", resultDataJson["reCaptchaStatus"]);
 
     // If login succeeds, it will redirect the user to movie-list.html
+    if (resultDataJson["reCaptchaStatus"] === "success") {
+        if (resultDataJson["status"] === "success") {
+            window.location.replace("index.html");
+        } else {
+            // If login fails, the web page will display
+            // error messages on <div> with id "login_error_message"
+            console.log("show error message");
+            console.log(resultDataJson["message"]);
+            $("#login_error_message").text(resultDataJson["message"]);
+        }
 
-    if (resultDataJson["status"] === "success") {
-        window.location.replace("index.html");
     } else {
-        // If login fails, the web page will display
-        // error messages on <div> with id "login_error_message"
-        console.log("show error message");
-        console.log(resultDataJson["message"]);
-        $("#login_error_message").text(resultDataJson["message"]);
+        console.log(resultDataJson["reCaptchaMessage"])
+        $("#login_error_message").text(resultDataJson["reCaptchaMessage"]);
     }
+
 }
 
 /**

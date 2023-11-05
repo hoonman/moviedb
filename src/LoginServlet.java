@@ -80,10 +80,15 @@ public class LoginServlet extends HttpServlet {
                 RecaptchaVerifyUtils.verify(gRecaptchaResponse);
                 // set the status as success
                 captchaSuccess = true;
+                responseJsonObject.addProperty("reCaptchaStatus", "success");
+                responseJsonObject.addProperty("reCaptchaMessage", "success");
 
             } catch (Exception e) {
                 // fill the data in as status failed
                 captchaSuccess = false;
+                responseJsonObject.addProperty("reCaptchaStatus", "fail");
+                responseJsonObject.addProperty("reCaptchaMessage", "reCaptcha has failed");
+
             }
             if (valid_email && correct_password && captchaSuccess) {
                 // Login success:
