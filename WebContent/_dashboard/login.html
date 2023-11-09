@@ -1,11 +1,69 @@
+<!-- This page will be redirected from any url if you are not logged in -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>login pagee</title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="global.css"/>
+    <!--    <link rel ="stylesheet" href="login.css"/>-->
+    <title>Employee Login</title>
+    <style>
+        h2 {
+            text-align: center;
+        }
+    </style>
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+
 </head>
+
 <body>
-<p>something in the wayy</p>
+<h2>Employee Login</h2>
+<!-- Set the method to POST to avoid showing the username/password in the URL
+     The default action is disabled to allow your own implementation. -->
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form id="login_form" method="post" action="#">
+                <div class="form-group">
+                    <label><b>Email</b></label>
+
+                    <label>
+                        <input name="email" class="form-control" placeholder="Enter Email" type="email">
+                    </label>
+
+                </div>
+                <div class="form-group">
+                    <label><b>Password</b></label>
+                    <label>
+                        <input name="password" class="form-control" placeholder="Enter Password" type="password">
+                    </label>
+                </div>
+                <input class="btn btn-primary btn-block" type="submit" value="Login">
+                <div class="g-recaptcha"
+                     data-sitekey = "6LdT4_MoAAAAAIaBLYB_VA1hi-NzyMoIdX82mpgi">
+                </div>
+            </form>
+            <div class="alert alert-danger mt-3" id="login_error_message">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- include jQuery-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!-- Load jQuery and Bootstrap JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<!-- include our own JS file -->
+<script src="login.js"></script>
 
 </body>
 </html>

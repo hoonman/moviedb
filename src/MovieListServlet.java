@@ -69,8 +69,6 @@ public class MovieListServlet extends HttpServlet {
         // Get a connection from dataSource and let resource manager close the connection after usage.
         try (Connection conn = dataSource.getConnection()) {
             // Get a connection from dataSource
-
-
             PreparedStatement statement = conn.prepareStatement(query);
             // Set parameter values based on their types
             int index = 1;
