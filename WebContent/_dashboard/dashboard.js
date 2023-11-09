@@ -1,7 +1,4 @@
 function handleResultData(resultData) {
-    // console.log("soething");
-    console.log(resultData);
-    // console.log(resultData[0]["ColumnName"]); //expiration
     displayData(resultData);
 }
 

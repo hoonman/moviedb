@@ -38,17 +38,12 @@ public class MetadataServlet extends HttpServlet {
             while (resultSet.next()) {
                 JsonObject columnMetadata = new JsonObject();
                 columnMetadata.addProperty("TableName", resultSet.getString("TABLE_NAME"));
-                System.out.println("table name: " + resultSet.getString("TABLE_NAME"));
                 columnMetadata.addProperty("ColumnName", resultSet.getString("COLUMN_NAME"));
-
-                System.out.println("table name: " + resultSet.getString("COLUMN_NAME"));
                 columnMetadata.addProperty("DataType", resultSet.getString("DATA_TYPE"));
-                System.out.println("table name: " + resultSet.getString("DATA_TYPE"));
                 metadataArray.add(columnMetadata);
             }
             resultSet.close();
             out.println(metadataArray.toString());
-            System.out.println(metadataArray.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
