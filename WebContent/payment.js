@@ -6,7 +6,6 @@ let saleId = "";
 
 function handleSessionData(resultDataString) {
     let resultDataJson = JSON.parse(resultDataString);
-
     let resultArray = resultDataJson["payUser"];
     //depending on whether or not the authorized is true or false, we will alert the user
     let resultArray_i = resultArray[resultArray.length - 1]["authorized"];
@@ -14,8 +13,6 @@ function handleSessionData(resultDataString) {
         saleId = resultArray[resultArray.length-1].saleId;
         console.log("sale id: ", saleId);
     }
-
-
     console.log("resultarray_i's authorization: ", resultArray_i["authorized"]);
     if (resultArray_i === false) {
         alert("Invalid data. Please try again.");
