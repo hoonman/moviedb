@@ -1,4 +1,4 @@
-import com.google.gson.JsonArray;
+import java.sql.ResultSet;
 import com.google.gson.JsonObject;
 
 import jakarta.servlet.ServletConfig;
@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import Star.Star;
 import moviePackage.AddMovie;
 
 import javax.naming.InitialContext;
@@ -77,6 +76,25 @@ public class AddMovieServlet extends HttpServlet {
         try (Connection conn = dataSource.getConnection()) {
 //            String insertQuery = "INSERT INTO stars (name, birthYear, id) VALUES (?, ?, ?)";
 //            String callProcedure = "{call insert_star(?, ?)}";
+            String checkDup = "SELECT id FROM movies WHERE title = ? AND `year` = ? AND director = ?;";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(checkDup)) {
+                preparedStatement.setString(1, movieTitle);
+                preparedStatement.setInt(2, Integer.parseInt(movieYear));
+                preparedStatement.setString(3, movieDirector);
+
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                if (resultSet.next()) {
+                    System.out.println("movie already exists... Aborting.");
+                    JsonObject responseJsonObject = new JsonObject();
+                    responseJsonObject.addProperty("status", "fail");
+//                    responseJsonObject.addProperty("message", "Movie already ex/ists");
+                    response.getWriter().write(responseJsonObject.toString());
+                    return;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
             String callProcedure = "{call add_movie(?, ?, ?, ?, ?)}";
             try (PreparedStatement preparedStatement = conn.prepareStatement(callProcedure)) {
 
