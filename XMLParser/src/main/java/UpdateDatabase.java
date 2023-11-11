@@ -7,10 +7,14 @@ import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 
 public class UpdateDatabase {
     private DataSource dataSource;
-    String url="jdbc:mysql://localhost:3306/moviedbtest";
+    String url="jdbc:mysql://localhost:3306/moviedb";
     String user = "mytestuser"; // Replace with your username
     String password = "My6$Password"; // Replace with your password
 
@@ -27,54 +31,94 @@ public class UpdateDatabase {
     }
 
     private void insertMovies(List<MovieData> movies) {
+        final int CHUNK_SIZE = 200; // Adjust based on your requirements
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        for (int i = 0; i < movies.size(); i += CHUNK_SIZE) {
+            final List<MovieData> chunk = new ArrayList<>(movies.subList(i, Math.min(i + CHUNK_SIZE, movies.size())));
+            Runnable task = () -> {
+                Connection conn = null;
+                try{
+                    conn = DriverManager.getConnection(url, user, password);
+                    conn.setAutoCommit(false);
+                    processMovieChunk(conn, chunk);
+                    conn.commit();
+                } catch (SQLException e) {
+                    try {
+                        if (conn != null) conn.rollback(); // Rollback in case of error
+                    } catch (SQLException ex) {
+                    }
+
+                } finally {
+                    try {
+                        if (conn != null) conn.close();
+                    } catch (SQLException ex) {
+                        // Log or handle the exception thrown on close
+                    }
+                }
+            };
+            executor.submit(task);
+        }
+
+        executor.shutdown(); // Disallow new tasks
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) { // Wait for tasks to complete
+                executor.shutdownNow(); // Force shutdown if tasks exceed time limit
+            }
+        } catch (InterruptedException ie) {
+            executor.shutdownNow(); // Cancel if current thread interrupted
+            Thread.currentThread().interrupt(); // Preserve interrupt status
+            // Log and handle the InterruptedException
+        }
+    }
+    private void processMovieChunk(Connection conn, List<MovieData> chunk ) throws SQLException {
         String insertMovieSql = "INSERT INTO movies (id, title, year, director) VALUES (?, ?, ?, ?)";
         String checkMovieSql = "SELECT COUNT(*) FROM movies WHERE title = ? AND year = ? AND director = ?";
         String checkMovieIDSql = "SELECT COUNT(*) FROM movies WHERE id = ?";
+        String insertRating = "INSERT INTO ratings (movieId, rating, numVotes) VALUES (?,?,?)";
 
-        try (Connection conn =  DriverManager.getConnection(url, user, password)) {
-            conn.setAutoCommit(false);
+        try (PreparedStatement checkStmt = conn.prepareStatement(checkMovieSql);
+             PreparedStatement movieStmt = conn.prepareStatement(insertMovieSql);
+             PreparedStatement movieIDStmt = conn.prepareStatement(checkMovieIDSql);
+             PreparedStatement ratingsStmt = conn.prepareStatement(insertRating);
+        ) {
 
-            try (PreparedStatement checkStmt = conn.prepareStatement(checkMovieSql);
-                 PreparedStatement movieStmt = conn.prepareStatement(insertMovieSql);
-                 PreparedStatement movieIDStmt = conn.prepareStatement(checkMovieIDSql);
-                 ) {
+            for (MovieData movie : chunk) {
+                // Check for existing movie
+                checkStmt.setString(1, movie.getTitle());
+                checkStmt.setInt(2, movie.getYear());
+                checkStmt.setString(3, movie.getDirector());
+                String movie_UUID = generateUUID(movie.getId());
+                movieIDStmt.setString(1, movie_UUID);
+                ResultSet resultSet = checkStmt.executeQuery();
+                ResultSet resultMovieIDSet = movieIDStmt.executeQuery();
+                ratingsStmt.setString(1, movie_UUID);
+                ratingsStmt.setFloat(2, -1);
+                ratingsStmt.setInt(3, -1);
 
-                for (MovieData movie : movies) {
-                    // Check for existing movie
-                    checkStmt.setString(1, movie.getTitle());
-                    checkStmt.setInt(2, movie.getYear());
-                    checkStmt.setString(3, movie.getDirector());
-                    String movie_UUID = generateUUID(movie.getId());
-                    movieIDStmt.setString(1, movie_UUID);
-                    ResultSet resultSet = checkStmt.executeQuery();
+                ratingsStmt.addBatch();
 
-                    ResultSet resultMovieIDSet = movieIDStmt.executeQuery();
-
-
-                    if (resultSet.next()
-                            && resultSet.getInt(1) == 0
-                            && resultMovieIDSet.next()
-                            && resultMovieIDSet.getInt(1) == 0) {
-                        // Insert new movie
-                        movieStmt.setString(1, movie_UUID);
-                        movieStmt.setString(2, movie.getTitle());
-                        movieStmt.setInt(3, movie.getYear());
-                        movieStmt.setString(4, movie.getDirector());
-                        movieStmt.addBatch();
-                    }
-                    // Reset for next iteration
-                    checkStmt.clearParameters();
-                    movieIDStmt.clearParameters();
+                if (resultSet.next()
+                        && resultSet.getInt(1) == 0
+                        && resultMovieIDSet.next()
+                        && resultMovieIDSet.getInt(1) == 0) {
+                    // Insert new movie
+                    movieStmt.setString(1, movie_UUID);
+                    movieStmt.setString(2, movie.getTitle());
+                    movieStmt.setInt(3, movie.getYear());
+                    movieStmt.setString(4, movie.getDirector());
+                    movieStmt.addBatch();
                 }
-
-                movieStmt.executeBatch();
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback(); // Rollback in case of error
-                throw e;
+                // Reset for next iteration
+                checkStmt.clearParameters();
+                movieIDStmt.clearParameters();
             }
+            movieStmt.executeBatch();
+            ratingsStmt.executeBatch();
+            conn.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            conn.rollback(); // Rollback in case of error
+            throw e;
         }
     }
 
@@ -146,68 +190,142 @@ public class UpdateDatabase {
         }
     }
 
-    private void insertStars(List<StarData> stars) {
+    private void insertStars(List<StarData> stars){
+        final int CHUNK_SIZE = 200; // Adjust based on your requirements
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        for (int i = 0; i < stars.size(); i += CHUNK_SIZE) {
+            final List<StarData> chunk = new ArrayList<>(stars.subList(i, Math.min(i + CHUNK_SIZE, stars.size())));
+            Runnable task = () -> {
+                Connection conn = null;
+                try {
+                    conn = DriverManager.getConnection(url, user, password);
+                    conn.setAutoCommit(false);
+                    processStarChunk(conn, chunk);
+                    conn.commit();
+                } catch (SQLException e) {
+                    try {
+                        if (conn != null) conn.rollback();
+                    } catch (SQLException ex) {
+                        // Log or handle the rollback exception
+                    }
+                    // Log or handle the original SQLException
+                } finally {
+                    try {
+                        if (conn != null) conn.close();
+                    } catch (SQLException ex) {
+                        // Log or handle the exception thrown on close
+                    }
+                }
+            };
+            executor.submit(task);
+        }
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException ie) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+            // Log and handle the InterruptedException
+        }
+    }
+    private void processStarChunk(Connection conn, List<StarData> stars) throws SQLException {
         String insertStarSql = "INSERT INTO stars (id, name, birthYear) VALUES (?, ?, ?)";
         String checkStarSql = "SELECT COUNT(*) FROM stars WHERE name = ? AND birthYear = ?";
         String checkStarIDSql = "SELECT COUNT(*) FROM stars WHERE id = ?";
 
-        try (Connection conn = DriverManager.getConnection(url, user, password)){
-            conn.setAutoCommit(false);
+        try(PreparedStatement starStmt = conn.prepareStatement(insertStarSql);
+            PreparedStatement checkStarStmt = conn.prepareStatement(checkStarSql);
+            PreparedStatement checkStarIDStmt = conn.prepareStatement(checkStarIDSql);
+        ) {
 
-            try(PreparedStatement starStmt = conn.prepareStatement(insertStarSql);
-                PreparedStatement checkStarStmt = conn.prepareStatement(checkStarSql);
-                PreparedStatement checkStarIDStmt = conn.prepareStatement(checkStarIDSql);
-                ) {
+            for (StarData star : stars) {
+                String starID = generateUUID(star.getStage_name());
+                checkStarStmt.setString(1, starID);
+                checkStarStmt.setString(2, star.getFirst_name() + star.getLast_name());
+                checkStarIDStmt.setString(1, starID);
+                ResultSet resultSet = checkStarStmt.executeQuery();
+                ResultSet resultSetID = checkStarIDStmt.executeQuery();
 
-                for (StarData star : stars) {
-                    String starID = generateUUID(star.getStage_name());
-                    checkStarStmt.setString(1, starID);
-                    checkStarStmt.setString(2, star.getFirst_name() + star.getLast_name());
-                    checkStarIDStmt.setString(1, starID);
-                    ResultSet resultSet = checkStarStmt.executeQuery();
-                    ResultSet resultSetID = checkStarIDStmt.executeQuery();
-
-                    if(resultSet.next() && resultSet.getInt(1) ==0 &&resultSetID.next() && resultSetID.getInt(1) == 0){
-                        starStmt.setString(1, starID);
-                        starStmt.setString(2, star.getFirst_name() +" "+ star.getLast_name());
-                        if (star.getYear() != -1) {
-                            starStmt.setInt(3, star.getYear());
-                        } else {
-                            starStmt.setNull(3, java.sql.Types.INTEGER);
-                        }
-                        starStmt.addBatch();
-
+                if(resultSet.next() && resultSet.getInt(1) ==0 &&resultSetID.next() && resultSetID.getInt(1) == 0){
+                    starStmt.setString(1, starID);
+                    starStmt.setString(2, star.getFirst_name() +" "+ star.getLast_name());
+                    if (star.getYear() != -1) {
+                        starStmt.setInt(3, star.getYear());
+                    } else {
+                        starStmt.setNull(3, java.sql.Types.INTEGER);
                     }
-                    checkStarStmt.clearParameters();
-                    checkStarIDStmt.clearParameters();
-                }
+                    starStmt.addBatch();
 
-                starStmt.executeBatch();
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback(); // Rollback in case of error
-                throw e;
+                }
+                checkStarStmt.clearParameters();
+                checkStarIDStmt.clearParameters();
             }
+
+            starStmt.executeBatch();
+            conn.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            conn.rollback(); // Rollback in case of error
+            throw e;
+        }
+    }
+    private void insertCasts(List<SimpleEntry<String, String>> casts) {
+        final int CHUNK_SIZE = 200; // Adjust based on your requirements
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        for (int i = 0; i < casts.size(); i += CHUNK_SIZE) {
+            final List<SimpleEntry<String, String>> chunk = new ArrayList<>(casts.subList(i, Math.min(i + CHUNK_SIZE, casts.size())));
+            Runnable task = () -> {
+                Connection conn = null;
+                try {
+                    conn = DriverManager.getConnection(url, user, password);
+                    conn.setAutoCommit(false);
+                    processCastChunk(conn, chunk);
+                    conn.commit();
+                } catch (SQLException e) {
+                    try {
+                        if (conn != null) conn.rollback();
+                    } catch (SQLException ex) {
+                        // Log or handle the rollback exception
+                    }
+                    // Log or handle the original SQLException
+                } finally {
+                    try {
+                        if (conn != null) conn.close();
+                    } catch (SQLException ex) {
+                        // Log or handle the exception thrown on close
+                    }
+                }
+            };
+            executor.submit(task);
+        }
+
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException ie) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+            // Log and handle the InterruptedException
         }
     }
 
-    private void insertCasts(List<SimpleEntry<String, String>> casts) {
+    private void processCastChunk(Connection conn, List<SimpleEntry<String, String>> casts) {
         String insertCastSql = "INSERT INTO stars_in_movies (starId, movieId) VALUES (?, ?)";
         String checkStarSql = "SELECT COUNT(*) FROM stars WHERE id = ?";
         String checkMovieSql = "SELECT COUNT(*) FROM movies WHERE id = ?";
         String checkStarInMovies = "SELECT COUNT(*) FROM stars_in_movies WHERE starId = ? AND movieId = ?";
 
-        try (Connection conn = DriverManager.getConnection(url, user, password)){
-            conn.setAutoCommit(false);
-
-            try(
-             PreparedStatement castStmt = conn.prepareStatement(insertCastSql);
-             PreparedStatement checkStarStmt = conn.prepareStatement(checkStarSql);
-             PreparedStatement checkMovieStmt = conn.prepareStatement(checkMovieSql);
-             PreparedStatement checkStarInMoviesStmt = conn.prepareStatement(checkStarInMovies);
-             ) {
+        try(
+                PreparedStatement castStmt = conn.prepareStatement(insertCastSql);
+                PreparedStatement checkStarStmt = conn.prepareStatement(checkStarSql);
+                PreparedStatement checkMovieStmt = conn.prepareStatement(checkMovieSql);
+                PreparedStatement checkStarInMoviesStmt = conn.prepareStatement(checkStarInMovies);
+        ) {
 
             for (SimpleEntry<String, String> cast : casts) {
                 String starID = generateUUID(cast.getValue());
@@ -242,17 +360,16 @@ public class UpdateDatabase {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static void main(String[] args) {
+        long startTime = System.nanoTime();
+
         UpdateDatabase updater = new UpdateDatabase();
         // Parse movies and insert into database
         MovieHandler movieHandler = new MovieHandler();
         movieHandler.parseDocument();
-        movieHandler.printMovies();
+//        movieHandler.printMovies();
         updater.insertMovies(movieHandler.getMovieList());
         updater.insertGenres(movieHandler.getMovieList());
         // Parse stars and insert into database
@@ -264,6 +381,17 @@ public class UpdateDatabase {
         CastHandler castHandler = new CastHandler();
         castHandler.parseDocument();
         updater.insertCasts(castHandler.getListOfEntries());
+
+        // Stop measuring execution time
+        long endTime = System.nanoTime();
+
+        // Calculate the execution time in milliseconds
+        long executionTime
+                = (endTime - startTime) / 1000000;
+
+        System.out.println("Parsing and inserting into database takes"
+                + executionTime + "ms");
+
     }
 
 }

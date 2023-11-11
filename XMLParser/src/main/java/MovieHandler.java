@@ -101,6 +101,10 @@ public class MovieHandler extends DefaultHandler {
                 if(currentMovie.getGenres().isEmpty()){
                     currentMovie.addGenre(new GenreData("Ctxx"));
                 }
+                if(currentMovie.getTitle().toLowerCase().contains("Unknown".toLowerCase()) || currentMovie.getDirector().toLowerCase().contains("Unknown".toLowerCase())){
+                    currentMovie.setInvalidEntry(true);
+                }
+
                 if(!currentMovie.isInvalidEntry() && !movieHashMap.containsKey(currentMovie.getId())){
                     movieList.add(currentMovie);
                     movieHashMap.put(currentMovie.getId(), currentMovie);
