@@ -9,16 +9,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
+import java.sql.*;
+
 import Star.Star;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.xml.crypto.Data;
-import java.sql.SQLException;
 
 @WebServlet(name="AddStarsServlet", urlPatterns = "/_dashboard/api/stars")
 public class AddStarsServlet extends HttpServlet {
@@ -38,6 +36,7 @@ public class AddStarsServlet extends HttpServlet {
         System.out.println("star: " + star.getStarName());
         System.out.println("star date: " + star.getDate());
         String status = (String) session.getAttribute("status");
+        String newId = (String) session.getAttribute("newId");
         System.out.println("status is: " + status);
         if (star == null) {
             star = new Star();
@@ -59,12 +58,15 @@ public class AddStarsServlet extends HttpServlet {
 
         responseJsonObject.add("newStar", starObject);
         responseJsonObject.addProperty("status", status);
+        responseJsonObject.addProperty("newId", newId);
         response.getWriter().write(responseJsonObject.toString());
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String starName = request.getParameter("starName");
         String birthYear = request.getParameter("birthYear");
+        String starId = "";
+
         Star newStar = new Star(starName, Integer.parseInt(birthYear));
         boolean success = false;
         try (Connection conn = dataSource.getConnection()) {
@@ -75,6 +77,7 @@ public class AddStarsServlet extends HttpServlet {
                 preparedStatement.setInt(2, newStar.getDate());
 //                preparedStatement.setString(3, "000001");
 
+
                 int rowsAffected = preparedStatement.executeUpdate();
 
                 if (rowsAffected > 0) {
@@ -83,6 +86,18 @@ public class AddStarsServlet extends HttpServlet {
                     HttpSession session = request.getSession();
                     session.setAttribute("newStar", newStar);
 //                    session.setAttribute("status", true);
+                    String idRetriever = "select id from stars where name=?";
+                    try (PreparedStatement preparedStatement1 = conn.prepareStatement(idRetriever)) {
+                        preparedStatement1.setString(1, starName);
+                        try (ResultSet resultSet = preparedStatement1.executeQuery()) {
+                            if (resultSet.next()) {
+                                starId = resultSet.getString("id");
+                                System.out.println("star id: " + starId);
+                            }
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
 
                     JsonObject responseJsonObject = new JsonObject();
                     JsonObject starObject = new JsonObject();
@@ -90,6 +105,8 @@ public class AddStarsServlet extends HttpServlet {
                     starObject.addProperty("birthYear", newStar.getDate());
                     responseJsonObject.add("newStar", starObject);
                     responseJsonObject.addProperty("status", "success");
+                    responseJsonObject.addProperty("newId", starId);
+
 
                     response.getWriter().write(responseJsonObject.toString());
                 } else {
