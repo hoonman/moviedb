@@ -126,20 +126,21 @@ public class MovieListServlet extends HttpServlet {
                 jsonObject.add("genres", genreJsonArray);
 
                 JsonArray starsJsonArray = new JsonArray();
+                if (stars != null){
 
-                String[] actors = stars.split(",");
-                // Iterate through the list and split each string
-                for (String actor : actors) {
-                    JsonObject actorObject = new JsonObject();
-                    String[] parts = actor.split("\\|");
-                    String name = parts[0];
-                    String id = parts[1];
-                    actorObject.addProperty("name", name);
-                    actorObject.addProperty("id", id);
-                    starsJsonArray.add(actorObject);
+                    String[] actors = stars.split(",");
+                    // Iterate through the list and split each string
+                    for (String actor : actors) {
+                        JsonObject actorObject = new JsonObject();
+                        String[] parts = actor.split("\\|");
+                        String name = parts[0];
+                        String id = parts[1];
+                        actorObject.addProperty("name", name);
+                        actorObject.addProperty("id", id);
+                        starsJsonArray.add(actorObject);
+                    }
                 }
                 jsonObject.add("stars", starsJsonArray);
-
                 jsonObject.addProperty("rating", rating);
 
                 jsonArray.add(jsonObject);
@@ -361,8 +362,8 @@ public class MovieListServlet extends HttpServlet {
         String page_size = request.getParameter("page_size");
         page_number = isNullOrEmpty(page_number)? "1" :  page_number;
         page_size = isNullOrEmpty(page_size)? "25" :  page_size;
-
-        Object[] params = { genreID, (Integer.parseInt(page_number)-1) * Integer.parseInt(page_size), Integer.parseInt(page_size)};
+        System.out.println("Calling Genre Browse");
+        Object[] params = { Integer.parseInt(genreID), (Integer.parseInt(page_number)-1) * Integer.parseInt(page_size), Integer.parseInt(page_size)};
         // The log message can be found in localhost log
         request.getServletContext().log("getting genreID: " + genreID);
         String query = "SELECT\n" +
