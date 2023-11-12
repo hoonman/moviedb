@@ -20,8 +20,11 @@ function addData(cartEvent) {
             console.log("Data sent to starsServlet successfully:", response);
             let jsonResponse = JSON.parse(response);
             let status = jsonResponse.status;
+            let newId = jsonResponse.newId;
             console.log("the status is: ", status);
-            $("#add_star_error_message").text(status);
+            $("#add_star_error_message").text(status + "\t\t" + newId);
+            // $("#add_star_error_message").text(newId);
+            // $("#add_star_error_message").text(status);
         },
         error: function(err) {
             console.error("Error while sending data to starsServlet:", err);
