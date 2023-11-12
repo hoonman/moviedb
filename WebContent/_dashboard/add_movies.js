@@ -15,7 +15,11 @@ function addData(cartEvent) {
             let movieId = jsonResponse.movieId;
             let genreId = jsonResponse.genreId;
             let starId = jsonResponse.starId;
-            $("#add_movie_error_message").text(status + " " + movieId + " " + genreId + " " + starId);
+            if (status === "fail") {
+                $("#add_movie_error_message").text("Movie already exists.");
+            } else {
+                $("#add_movie_error_message").text(status + " " + movieId + " " + genreId + " " + starId);
+            }
         },
         error: function(err) {
             console.log("error while posting data to addmoviesServlet: ", err);
