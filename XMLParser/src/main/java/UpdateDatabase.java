@@ -19,6 +19,12 @@ public class UpdateDatabase {
     String password = "My6$Password"; // Replace with your password
 
     private static final String NAMESPACE = "fabflix.com";
+    private int genres_inserted = 0;
+    private int movies_inserted = 0;
+    private int stars_inserted = 0;
+    private int genres_in_movies_inserted = 0;
+    private int stars_in_movies_inserted = 0;
+
     private String generateUUID(String name){
         try {
             MessageDigest sha256Digest = MessageDigest.getInstance("SHA-256");
@@ -113,7 +119,12 @@ public class UpdateDatabase {
                 checkStmt.clearParameters();
                 movieIDStmt.clearParameters();
             }
-            movieStmt.executeBatch();
+            int[] movieInsertResults = movieStmt.executeBatch();
+            for (int result : movieInsertResults) {
+                if (result != Statement.EXECUTE_FAILED) {
+                    movies_inserted++;
+                }
+            }
             ratingsStmt.executeBatch();
             conn.commit();
         } catch (SQLException e) {
@@ -157,8 +168,11 @@ public class UpdateDatabase {
                             genreCount++;
                             insertGenreStmt.setInt(1, genreCount);
                             insertGenreStmt.setString(2, genre.name);
-                            insertGenreStmt.executeUpdate();
-                            existingGenres.add(genre.name);
+                            int genreInsertResult = insertGenreStmt.executeUpdate();
+                            if (genreInsertResult != 0) {
+                                genres_inserted++;
+                                existingGenres.add(genre.name);
+                            }
                         }
 
                         // Retrieve genreId
@@ -176,7 +190,10 @@ public class UpdateDatabase {
                             // Insert into genres_in_movies
                             insertGenreMovieStmt.setInt(1, genre_id);
                             insertGenreMovieStmt.setString(2, movie_UUID);
-                            insertGenreMovieStmt.executeUpdate();
+                            int genreMovieInsertResult = insertGenreMovieStmt.executeUpdate();
+                            if (genreMovieInsertResult != 0) {
+                                genres_in_movies_inserted++;
+                            }
                         }
                     }
                 }
@@ -264,7 +281,14 @@ public class UpdateDatabase {
                 checkStarIDStmt.clearParameters();
             }
 
-            starStmt.executeBatch();
+
+            int[] starsInsertResults = starStmt.executeBatch();
+            for (int result : starsInsertResults) {
+                if (result != Statement.EXECUTE_FAILED) {
+                    stars_inserted++;
+                }
+            }
+
             conn.commit();
         } catch (SQLException e) {
             conn.rollback(); // Rollback in case of error
@@ -355,7 +379,13 @@ public class UpdateDatabase {
                 checkMovieStmt.clearParameters();
             }
 
-            castStmt.executeBatch();
+
+            int[] castInsertResults = castStmt.executeBatch();
+            for (int result : castInsertResults) {
+                if (result != Statement.EXECUTE_FAILED) {
+                    stars_in_movies_inserted++;
+                }
+            }
             conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -373,6 +403,14 @@ public class UpdateDatabase {
                 .collect(Collectors.toList());
     }
 
+    private void printInsertionStats() {
+        System.out.println("Insertion Statistics:");
+        System.out.println("\tGenres Inserted: " + genres_inserted);
+        System.out.println("\tMovies Inserted: " + movies_inserted);
+        System.out.println("\tStars Inserted: " + stars_inserted);
+        System.out.println("\tGenres-In-Movies Inserted: " + genres_in_movies_inserted);
+        System.out.println("\tStars-In-Movies Inserted: " + stars_in_movies_inserted);
+    }
 
     public static void main(String[] args) {
         long startTime = System.nanoTime();
@@ -402,15 +440,13 @@ public class UpdateDatabase {
                 = (endTime - startTime) / 1_000_000_000;
 
         System.out.println("Parsing and inserting into database takes "
-                + executionTime + "seconds");
-
-        System.out.println("Movies with no stars: "+ (movieHandler.getMovieList().size() - movieList.size() ));
-        System.out.println("Stars with no movies: "+ (starHandler.getStarDataList().size() - starList.size()));
+                + executionTime + " seconds");
+        updater.printInsertionStats();
         movieHandler.printData();
         starHandler.printData();
         castHandler.printData();
-
-
+        System.out.println("\tMovies with no stars: "+ (movieHandler.getMovieList().size() - movieList.size() ));
+        System.out.println("\tStars with no movies: "+ (starHandler.getStarDataList().size() - starList.size()));
 
     }
 

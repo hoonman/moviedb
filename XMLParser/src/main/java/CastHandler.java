@@ -65,10 +65,10 @@ public class CastHandler extends DefaultHandler {
         System.out.println("List of Entries:" + listOfEntries.size());
     }
     public void printData(){
-        System.out.println("List of Stars in Movies Entries:" + listOfEntries.size());
-        System.out.println("Duplicate Stars in Movies Entries: "+ duplicate_entry);
-        System.out.println("Stars in Movies - Stars not found: "+ star_not_found);
-        System.out.println("Stars in Movies - Movies not found: "+ duplicate_entry);
+//        System.out.println("List of Stars in Movies Entries:" + listOfEntries.size());
+        System.out.println("\tDuplicate Stars in Movies Entries: "+ duplicate_entry);
+        System.out.println("\tStars in Movies - Stars not found: "+ star_not_found);
+        System.out.println("\tStars in Movies - Movies not found: "+ duplicate_entry);
     }
 
     public void parseDocument(){

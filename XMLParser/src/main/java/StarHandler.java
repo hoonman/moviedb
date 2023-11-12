@@ -45,8 +45,9 @@ public class StarHandler extends DefaultHandler {
     }
 
     public void printData(){
-        System.out.println("Duplicate Star Entries: "+ duplicate_entry);
-        System.out.println("Valid Stars Found: " +starList.size());
+//        System.out.println("Valid Stars Found: " +starList.size());
+        System.out.println("\tDuplicate Star Entries: "+ duplicate_entry);
+
     }
     private void printStars(){
         for (StarData star: starList) {

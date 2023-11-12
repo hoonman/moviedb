@@ -45,9 +45,9 @@ public class MovieHandler extends DefaultHandler {
     }
 
     public void printData() {
-        System.out.println("Duplicate Movie Entries: " + duplicate_entry);
-        System.out.println("Inconsistent Movie Entries: " + inconsistent_entry);
-        System.out.println("Valid Movies Found: " + movieList.size());
+//        System.out.println("Valid Movies Found: " + movieList.size());
+        System.out.println("\tDuplicate Movie Entries: " + duplicate_entry);
+        System.out.println("\tInconsistent Movie Entries: " + inconsistent_entry);
     }
     public void printMovies(){
         for (MovieData movie: movieList) {
