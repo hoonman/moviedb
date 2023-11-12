@@ -7,6 +7,20 @@ Demo video URL of Project 2: https://youtu.be/yCj33M3dh3I
 We used the Like/ILike predicate in the MovieListServlet. We used it for constructing SQL queries for searching movies based on various criteria.
 For example, we used LIKE to perform substring matching on the "title" and "director" columns.
 
+
+**Prepared Statement Usage**
+We used Prepared Statement in the following Servlets:
+* MovieListServlet
+* SingleMovieServlet
+* SingleStarServlet
+* AddMovieServlet
+* AddStarServlet
+* EmployeeLoginServlet
+* GenreAllServlet
+* LoginServlet
+* MetadataServlet
+* PaymentServlet
+
 **Inconsistencies Report**
 Duplicate Handling
   We've taking into consideration for multiple datatypes
