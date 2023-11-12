@@ -221,7 +221,7 @@ public class SingleMovieServlet extends HttpServlet {
                     "        WHERE\n" +
                     "            m.id = ?\n" +
                     "    ) AS sub\n" +
-                    "JOIN ratings r ON sub.MovieId = r.movieId\n" +
+                    "LEFT JOIN ratings r ON sub.MovieId = r.movieId\n" +
                     "ORDER BY\n" +
                     "    (SELECT COUNT(*) FROM stars_in_movies sim WHERE sim.starId = sub.Stars) DESC, sub.MovieTitle ASC\n" +
                     "LIMIT 20;\n";
