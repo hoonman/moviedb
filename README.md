@@ -45,8 +45,10 @@ Jason:
 * CSS Styling
 * Movielist/Index Servlet & html page
 * Login, Search and Browse, Extend movie list, sorting, previous/next, extend single page.
+* XML Parsing (task 6)
 
 Jaehoon:
 * Single Movie Servlet & html
 * Single Star html
 * CSS Styling, jump functionality, shopping cart, payment, and confirmation.
+* added feature to add new movie and star (task 1-5)
