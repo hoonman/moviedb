@@ -1,11 +1,7 @@
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.List;
-
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -20,6 +16,29 @@ public class CastHandler extends DefaultHandler {
     private String currentMovie;
     private String currentStar;
 
+    private Set<String> movieDataSet;
+    private Set<String> starDataSet;
+
+    public Set<String> getMovieFoundSet() {
+        return movieFoundSet;
+    }
+
+    public Set<String> getStarFoundSet() {
+        return starFoundSet;
+    }
+
+    private Set<String> movieFoundSet;
+    private Set<String> starFoundSet;
+
+    public int star_not_found = 0;
+    public int movie_not_found = 0;
+    public int duplicate_entry = 0;
+
+    public CastHandler(Set<String> movieDataSet1, Set<String> starDataSet1) {
+        movieDataSet = movieDataSet1;
+        starDataSet = starDataSet1;
+    }
+
     public List<SimpleEntry<String, String>> getListOfEntries() {
         return listOfEntries;
     }
@@ -28,22 +47,28 @@ public class CastHandler extends DefaultHandler {
     }
     List<SimpleEntry<String, String>> listOfEntries;
     private HashMap<SimpleEntry<String, String>, Boolean> entriesMap;
-    public static void main(String[] args) {
-        CastHandler cast_spe = new CastHandler();
-        cast_spe.runMain();
-
-    }
+//    public static void main(String[] args) {
+//        CastHandler cast_spe = new CastHandler();
+//        cast_spe.runMain();
+//
+//    }
 
     private void runMain(){
         parseDocument();
         printData();
     }
 
-    private void printData(){
+    private void printEntries(){
         for (SimpleEntry<String, String> tuple : listOfEntries) {
             System.out.println("(" + tuple.getKey() + ", " + tuple.getValue() + ")");
         }
         System.out.println("List of Entries:" + listOfEntries.size());
+    }
+    public void printData(){
+        System.out.println("List of Stars in Movies Entries:" + listOfEntries.size());
+        System.out.println("Duplicate Stars in Movies Entries: "+ duplicate_entry);
+        System.out.println("Stars in Movies - Stars not found: "+ star_not_found);
+        System.out.println("Stars in Movies - Movies not found: "+ duplicate_entry);
     }
 
     public void parseDocument(){
@@ -75,6 +100,8 @@ public class CastHandler extends DefaultHandler {
     public void startDocument() throws SAXException {
         listOfEntries = new ArrayList<>();
         entriesMap =  new HashMap<>();
+        movieFoundSet = new HashSet<>();
+        starFoundSet = new HashSet<>();
     }
 
     @Override
@@ -89,10 +116,21 @@ public class CastHandler extends DefaultHandler {
             String trimmedStar = currentStar.trim();
             SimpleEntry<String, String> entry = new SimpleEntry<>(trimmedMovie, trimmedStar);
             // Check if the entry is already in the map to detect duplicates
-            if (!entriesMap.containsKey(entry) && !trimmedStar.isEmpty() && !trimmedMovie.isEmpty() && !trimmedStar.equals("s a")) {
-                listOfEntries.add(entry);
-                entriesMap.put(entry, true); // Add to the map to track for duplicates
+            if(!trimmedStar.isEmpty() && !trimmedMovie.isEmpty()){
+                if(trimmedStar.equals("s a") || !starDataSet.contains(trimmedStar)){
+                    star_not_found++;
+                } else if (!movieDataSet.contains(trimmedMovie)) {
+                    movie_not_found++;
+                } else if (entriesMap.containsKey(entry)) {
+                    duplicate_entry++;
+                } else {
+                    movieFoundSet.add(trimmedMovie);
+                    starFoundSet.add(trimmedStar);
+                    listOfEntries.add(entry);
+                    entriesMap.put(entry, true); // Add to the map to track for duplicates
+                }
             }
+
 
         } else if ("f".equalsIgnoreCase(qName)) {
             currentMovie = characters.toString().strip();

@@ -31,6 +31,8 @@ public class MovieHandler extends DefaultHandler {
     private List<MovieData> movieList;
     private String director;
 
+    public int inconsistent_entry = 0;
+    public int duplicate_entry = 0;
     public static void main(String[] args) {
         MovieHandler spe = new MovieHandler();
         spe.runMain();
@@ -39,8 +41,14 @@ public class MovieHandler extends DefaultHandler {
     void runMain(){
         parseDocument();
         printMovies();
+        printData();
     }
 
+    public void printData() {
+        System.out.println("Duplicate Movie Entries: " + duplicate_entry);
+        System.out.println("Inconsistent Movie Entries: " + inconsistent_entry);
+        System.out.println("Valid Movies Found: " + movieList.size());
+    }
     public void printMovies(){
         for (MovieData movie: movieList) {
             System.out.println(movie.toString());
@@ -99,7 +107,7 @@ public class MovieHandler extends DefaultHandler {
             if ("film".equalsIgnoreCase(qName)) {
                 currentMovie.setDirector(director);
                 if(currentMovie.getGenres().isEmpty()){
-                    currentMovie.addGenre(new GenreData("Ctxx"));
+                    currentMovie.setInvalidEntry(true);
                 }
                 if(currentMovie.getTitle().toLowerCase().contains("Unknown".toLowerCase()) || currentMovie.getDirector().toLowerCase().contains("Unknown".toLowerCase())){
                     currentMovie.setInvalidEntry(true);
@@ -108,6 +116,10 @@ public class MovieHandler extends DefaultHandler {
                 if(!currentMovie.isInvalidEntry() && !movieHashMap.containsKey(currentMovie.getId())){
                     movieList.add(currentMovie);
                     movieHashMap.put(currentMovie.getId(), currentMovie);
+                } else if (!currentMovie.isInvalidEntry()) {
+                    duplicate_entry++;
+                } else if (!movieHashMap.containsKey(currentMovie.getId())) {
+                    inconsistent_entry++;
                 }
             } else if ("t".equalsIgnoreCase(qName)) {
                 currentMovie.setTitle(characters.toString().strip());

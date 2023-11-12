@@ -10,7 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
+import java.util.stream.Collectors;
 
 public class UpdateDatabase {
     private DataSource dataSource;
@@ -362,24 +362,36 @@ public class UpdateDatabase {
         }
     }
 
+    public List<MovieData> filterMovies(Set<String> foundMovies, List<MovieData> movieDataList){
+        return movieDataList.stream()
+                .filter(movieData -> foundMovies.contains(movieData.getId()))
+                .collect(Collectors.toList());
+    }
+    public List<StarData> filterStars(Set<String> foundStars, List<StarData> starDataList){
+        return starDataList.stream()
+                .filter(starData -> foundStars.contains(starData.getStage_name()))
+                .collect(Collectors.toList());
+    }
+
+
     public static void main(String[] args) {
         long startTime = System.nanoTime();
 
         UpdateDatabase updater = new UpdateDatabase();
-        // Parse movies and insert into database
         MovieHandler movieHandler = new MovieHandler();
-        movieHandler.parseDocument();
-//        movieHandler.printMovies();
-        updater.insertMovies(movieHandler.getMovieList());
-        updater.insertGenres(movieHandler.getMovieList());
-        // Parse stars and insert into database
         StarHandler starHandler = new StarHandler();
-        starHandler.parseDocument();
-        updater.insertStars(starHandler.getStarDataList());
 
-        // Parse casts and insert into database
-        CastHandler castHandler = new CastHandler();
+        movieHandler.parseDocument();
+        starHandler.parseDocument();
+        CastHandler castHandler = new CastHandler(movieHandler.getMovieHashMap().keySet(), starHandler.getStarHashMap().keySet());
         castHandler.parseDocument();
+
+        List<MovieData> movieList =  updater.filterMovies(castHandler.getMovieFoundSet(), movieHandler.getMovieList() );
+        List<StarData> starList =  updater.filterStars(castHandler.getStarFoundSet(), starHandler.getStarDataList() );
+
+        updater.insertMovies(movieList);
+        updater.insertGenres(movieList);
+        updater.insertStars(starList);
         updater.insertCasts(castHandler.getListOfEntries());
 
         // Stop measuring execution time
@@ -387,10 +399,18 @@ public class UpdateDatabase {
 
         // Calculate the execution time in milliseconds
         long executionTime
-                = (endTime - startTime) / 1000000;
+                = (endTime - startTime) / 1_000_000_000;
 
-        System.out.println("Parsing and inserting into database takes"
-                + executionTime + "ms");
+        System.out.println("Parsing and inserting into database takes "
+                + executionTime + "seconds");
+
+        System.out.println("Movies with no stars: "+ (movieHandler.getMovieList().size() - movieList.size() ));
+        System.out.println("Stars with no movies: "+ (starHandler.getStarDataList().size() - starList.size()));
+        movieHandler.printData();
+        starHandler.printData();
+        castHandler.printData();
+
+
 
     }
 

@@ -29,6 +29,9 @@ public class StarHandler extends DefaultHandler {
 
     private HashMap<String,StarData> starHashMap;
 
+    public int duplicate_entry = 0;
+
+
     public static void main(String[] args) {
         StarHandler spe = new StarHandler();
         spe.runMain();
@@ -37,8 +40,14 @@ public class StarHandler extends DefaultHandler {
     void runMain(){
         parseDocument();
         printStars();
+        printData();
+
     }
 
+    public void printData(){
+        System.out.println("Duplicate Star Entries: "+ duplicate_entry);
+        System.out.println("Valid Stars Found: " +starList.size());
+    }
     private void printStars(){
         for (StarData star: starList) {
             System.out.println(star.toString());
@@ -109,7 +118,10 @@ public class StarHandler extends DefaultHandler {
                 if(!currentStar.isInvalidEntry && !starHashMap.containsKey(currentStar.stage_name)){
                     starList.add(currentStar);
                     starHashMap.put(currentStar.stage_name, currentStar);
+                } else if (starHashMap.containsKey(currentStar.stage_name)) {
+                    duplicate_entry++;
                 }
+
             } else if ("stagename".equalsIgnoreCase(qName)) {
                 currentStar.setStage_name(characters.toString().strip());
             }  else if ("dob".equalsIgnoreCase(qName)) {
