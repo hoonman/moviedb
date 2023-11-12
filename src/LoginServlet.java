@@ -39,6 +39,8 @@ public class LoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
+        // encrypt password here and authenticate
+
         /* This example only allows username/password to be test/test
         /  in the real project, you should talk to the database to verify username/password
         */
