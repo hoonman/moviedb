@@ -89,7 +89,6 @@ public class PaymentServlet extends HttpServlet {
      * handles POST requests to add and show the item list information
      */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        System.out.println("dopost");
         //shopping cart functionality
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
@@ -99,7 +98,6 @@ public class PaymentServlet extends HttpServlet {
         String expDate = request.getParameter("expDate");
         String movieId = request.getParameter("movieId");
         String saleId = request.getParameter("saleId");
-        System.out.println("####In servlet saleId: " + saleId);
         boolean authorizer = false;
         int lastId = 0;
         try (Connection conn = dataSource.getConnection()) {

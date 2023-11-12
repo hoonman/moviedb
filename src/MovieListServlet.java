@@ -69,8 +69,6 @@ public class MovieListServlet extends HttpServlet {
         // Get a connection from dataSource and let resource manager close the connection after usage.
         try (Connection conn = dataSource.getConnection()) {
             // Get a connection from dataSource
-
-
             PreparedStatement statement = conn.prepareStatement(query);
             // Set parameter values based on their types
             int index = 1;
@@ -217,7 +215,7 @@ public class MovieListServlet extends HttpServlet {
                     "    ) " +
                     "    AND SUBSTRING(m.title, 1, 1) NOT REGEXP '^[A-Za-z0-9]' " +
                     ") AS sub " +
-                    "JOIN ratings r ON sub.MovieId = r.movieId " +
+                    "LEFT JOIN ratings r ON sub.MovieId = r.movieId " +
                     "ORDER BY r.rating DESC " +
                     "LIMIT ?, ?;";
         }else{
@@ -250,7 +248,7 @@ public class MovieListServlet extends HttpServlet {
                     "    ) " +
                     "    AND SUBSTRING(m.title, 1, 1) = ?" +
                     ") AS sub " +
-                    "JOIN ratings r ON sub.MovieId = r.movieId " ;
+                    "LEFT JOIN ratings r ON sub.MovieId = r.movieId " ;
             query += constructSortQuery(order);
 //                "ORDER BY r.rating DESC, sub.MovieTitle ASC\n";
 
@@ -332,7 +330,7 @@ public class MovieListServlet extends HttpServlet {
                 "           AND (? = -1 OR m.year = ?)\n" +
                 "           AND (? = \'!\'  OR m.title LIKE ?)\n" +
                 "    ) AS sub\n" +
-                "JOIN ratings r ON sub.MovieId = r.movieId\n" +
+                "LEFT JOIN ratings r ON sub.MovieId = r.movieId\n" +
                 "WHERE\n" +
                 "    sub.MovieId IN (\n" +
                 "        SELECT movieId\n" +
@@ -415,7 +413,7 @@ public class MovieListServlet extends HttpServlet {
                 "                WHERE g.id = ?\n" +
                 "            )\n" +
                 "    ) AS sub\n" +
-                "JOIN ratings r ON sub.MovieId = r.movieId\n";
+                "LEFT JOIN ratings r ON sub.MovieId = r.movieId\n";
         query += constructSortQuery(order);
 //                "ORDER BY r.rating DESC, sub.MovieTitle ASC\n";
 
@@ -473,7 +471,7 @@ public class MovieListServlet extends HttpServlet {
                 "        FROM\n" +
                 "            movies m\n" +
                 "    ) AS sub\n" +
-                "JOIN ratings r ON sub.MovieId = r.movieId\n";
+                "LEFT JOIN ratings r ON sub.MovieId = r.movieId\n";
                 query += constructSortQuery(order);
 //                "ORDER BY r.rating DESC, sub.MovieTitle ASC\n";
 

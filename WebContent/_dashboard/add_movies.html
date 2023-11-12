@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!--    <link rel ="stylesheet" href="global.css"/>-->
+    <title>Add Movies</title>
+</head>
+<body>
+<h2>Add Movies</h2>
+<div class="container">
+    <form action="#" id="add_movies_form" method="post">
+        <div id="form-group">
+            <label><b>Movie Title</b></label>
+            <label>
+                <input name="movieTitle" class="form-control" placeholder="Enter movie title" type="movieTitle">
+            </label>
+        </div>
+        <div class="form-group">
+            <label><b>Movie Year</b></label>
+            <label>
+                <input name="movieYear" class="form-control" placeholder="Enter the movie was released" type="movieYear">
+            </label>
+        </div>
+        <div class="form-group">
+            <label><b>Movie Director</b></label>
+            <label>
+                <input name="movieDirector" class="form-control" placeholder="Enter movie director" type="movieDirector">
+            </label>
+        </div>
+        <div class="form-group">
+            <label><b>Star Name</b></label>
+            <label>
+                <input name="starName" class="form-control" placeholder="Enter star name" type="starName">
+            </label>
+        </div>
+        <div class="form-group">
+            <label><b>Genre Name</b></label>
+            <label>
+                <input name="genreName" class="form-control" placeholder="Enter genre name" type="genreName">
+            </label>
+        </div>
+        <input class="btn btn-primary btn-block" type="submit" value="Add Movie">
+    </form>
+    <div class="alert alert-danger mt-3" id="add_movie_error_message">
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="add_movies.js"></script>
+
+</body>
+</html>

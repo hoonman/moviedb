@@ -1,3 +1,21 @@
+//import com.google.gson.JsonArray;
+//import com.google.gson.JsonObject;
+//import jakarta.servlet.annotation.WebServlet;
+//import jakarta.servlet.http.HttpServlet;
+//import jakarta.servlet.http.HttpServletRequest;
+//import jakarta.servlet.http.HttpServletResponse;
+//import jakarta.servlet.http.HttpSession;
+//import java.io.IOException;
+//
+//
+//@WebServlet("/_dashboard/login.html")
+//public class EmployeeLoginServlet extends HttpServlet {
+//    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+//        // Your dashboard logic here
+//        response.setContentType("text/html");
+//        response.getWriter().println("<html><body><h1>Welcome to the dashboard!</h1></body></html>");
+//    }
+//}
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletConfig;
@@ -17,8 +35,8 @@ import java.sql.ResultSet;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
-@WebServlet(name = "LoginServlet", urlPatterns = "/api/login")
-public class LoginServlet extends HttpServlet {
+@WebServlet(name = "EmployeeLoginServlet", urlPatterns = "/_dashboard/api/login")
+public class EmployeeLoginServlet extends HttpServlet {
     /**
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
      */
@@ -54,7 +72,7 @@ public class LoginServlet extends HttpServlet {
 
             // Construct a query with parameter represented by "?"
             String query = "SELECT password \n" +
-                    "FROM customers\n" +
+                    "FROM employees \n" +
                     "WHERE email = ?\n"+
                     "LIMIT 1;";
             PreparedStatement statement = conn.prepareStatement(query);
