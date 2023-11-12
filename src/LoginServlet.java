@@ -14,8 +14,9 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.DriverManager;
-import java.sql.Statement;
+import org.jasypt.util.password.PasswordEncryptor;
+import org.jasypt.util.password.StrongPasswordEncryptor;
+import org.jasypt.util.text.AES256TextEncryptor;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/api/login")
 public class LoginServlet extends HttpServlet {
@@ -40,6 +41,9 @@ public class LoginServlet extends HttpServlet {
         String password = request.getParameter("password");
 
         // encrypt password here and authenticate
+        PasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
+        String encryptedPassword = passwordEncryptor.encryptPassword(password);
+
 
         /* This example only allows username/password to be test/test
         /  in the real project, you should talk to the database to verify username/password
@@ -70,8 +74,15 @@ public class LoginServlet extends HttpServlet {
             while (rs.next()) {
                 valid_email = true;
                 String sql_password = rs.getString("password");
-                correct_password = password.equals(sql_password);
+//                correct_password = password.equals(sql_password);
+                AES256TextEncryptor textEncryptor = new AES256TextEncryptor();
+                textEncryptor.setPassword(sql_password);
+                String myEncryptedText = textEncryptor.encrypt(sql_password);
+                String decryptedPassword = textEncryptor.decrypt(myEncryptedText);
+                correct_password = decryptedPassword.equals(sql_password);
 
+                System.out.println("decrypted password: " + decryptedPassword);
+                System.out.println("password from sql: " + sql_password);
             }
             rs.close();
             statement.close();

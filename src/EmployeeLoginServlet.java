@@ -23,6 +23,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jasypt.util.text.AES256TextEncryptor;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -86,7 +87,15 @@ public class EmployeeLoginServlet extends HttpServlet {
             while (rs.next()) {
                 valid_email = true;
                 String sql_password = rs.getString("password");
-                correct_password = password.equals(sql_password);
+                AES256TextEncryptor textEncryptor = new AES256TextEncryptor();
+                textEncryptor.setPassword(sql_password);
+                String myEncryptedText = textEncryptor.encrypt(sql_password);
+                String decryptedPassword = textEncryptor.decrypt(myEncryptedText);
+                correct_password = decryptedPassword.equals(sql_password);
+
+                System.out.println("decrypted password: " + decryptedPassword);
+                System.out.println("password from sql: " + sql_password);
+//                correct_password = password.equals(sql_password);
 
             }
             rs.close();
