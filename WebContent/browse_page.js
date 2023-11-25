@@ -13,19 +13,19 @@ const nextButton = $("#nextBtn");
 const pageCounter = $("#pageCounter");
 
 function getParameterByName(target) {
-    // Get request URL
-    let url = window.location.href;
-    // Encode target parameter name to url encoding
-    target = target.replace(/[\[\]]/g, "\\$&");
+  // Get request URL
+  let url = window.location.href;
+  // Encode target parameter name to url encoding
+  target = target.replace(/[\[\]]/g, "\\$&");
 
-    // Ues regular expression to find matched parameter value
-    let regex = new RegExp("[?&]" + target + "(=([^&#]*)|&|#|$)"),
-        results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return "";
+  // Ues regular expression to find matched parameter value
+  let regex = new RegExp("[?&]" + target + "(=([^&#]*)|&|#|$)"),
+    results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return "";
 
-    // Return the decoded parameter value
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
+  // Return the decoded parameter value
+  return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
 /**
@@ -34,98 +34,97 @@ function getParameterByName(target) {
  */
 
 function handleResult(resultData) {
-    console.log("handleResult: populating star info from resultData");
+  console.log("handleResult: populating star info from resultData");
 
-    console.log(resultData);
+  console.log(resultData);
 
-    // Populate the star table
-    // Find the empty table body by id "movie_table_body"
-    let movieTableBodyElement = jQuery("#movie_table_body");
-    movieTableBodyElement.empty();
-    if (resultData.length < page_size_amt) {
-        last_page = true;
-    } else {
-        last_page = false;
+  // Populate the star table
+  // Find the empty table body by id "movie_table_body"
+  let movieTableBodyElement = jQuery("#movie_table_body");
+  movieTableBodyElement.empty();
+  if (resultData.length < page_size_amt) {
+    last_page = true;
+  } else {
+    last_page = false;
+  }
+  // Concatenate the html tags with resultData jsonObject to create table rows
+  for (let i = 0; i < resultData.length; i++) {
+    let rowHTML = "";
+    rowHTML += '<tr class="table-default">';
+    rowHTML +=
+      "<th>" +
+      '<a href="single-movie.html?id=' +
+      resultData[i]["movie_Id"] +
+      '">' +
+      resultData[i]["movie_Title"] +
+      "</a>" +
+      "</th>";
+    rowHTML += "<th>" + resultData[i]["movie_Year"] + "</th>";
+    rowHTML += "<th>" + resultData[i]["director"] + "</th>";
+    rowHTML += "<th>";
+
+    for (let j = 0; j < resultData[i]["genres"].length; j++) {
+      rowHTML +=
+        '<a href ="browse_page.html?genreID=' +
+        resultData[i]["genres"][j]["id"] +
+        "&page_number=1&page_size=25" +
+        '">' +
+        resultData[i]["genres"][j]["name"] +
+        " " +
+        "</a>";
     }
-    // Concatenate the html tags with resultData jsonObject to create table rows
-    for (let i = 0; i < resultData.length; i++) {
-        let rowHTML = "";
-        rowHTML += '<tr class="table-default">';
-        rowHTML +=
-            "<th>" +
-            '<a href="single-movie.html?id=' +
-            resultData[i]["movie_Id"] +
-            '">' +
-            resultData[i]["movie_Title"] +
-            "</a>" +
-            "</th>";
-        rowHTML += "<th>" + resultData[i]["movie_Year"] + "</th>";
-        rowHTML += "<th>" + resultData[i]["director"] + "</th>";
-        rowHTML += "<th>";
+    rowHTML += "</th>";
 
-        for (let j = 0; j < resultData[i]["genres"].length; j++) {
-            rowHTML +=
-                '<a href ="browse_page.html?genreID=' +
-                resultData[i]["genres"][j]["id"] +
-                "&page_number=1&page_size=25" +
-                '">' +
-                resultData[i]["genres"][j]["name"] +
-                " " +
-                "</a>";
-        }
-        rowHTML += "</th>";
+    rowHTML += "<th>";
 
-        rowHTML += "<th>";
-
-        for (let j = 0; j < resultData[i]["stars"].length; j++) {
-            rowHTML +=
-                '<a href ="single-star.html?id=' +
-                resultData[i]["stars"][j]["id"] +
-                '">' +
-                resultData[i]["stars"][j]["name"] +
-                " " +
-                "</a>";
-        }
-        rowHTML += "</th>";
-        rowHTML += "<th>" + resultData[i]["rating"] + "</th>";
-        rowHTML +=
-            "<th><button class='cart-button' data-movie-title='" +
-            resultData[i]["movie_Title"] +
-            "'>Add to Cart</button>";
-        rowHTML += "</th>";
-        rowHTML += "</tr>";
-        movieTableBodyElement.append(rowHTML);
-
-        // Append the row created to the table body, which will refresh the page
+    for (let j = 0; j < resultData[i]["stars"].length; j++) {
+      rowHTML +=
+        '<a href ="single-star.html?id=' +
+        resultData[i]["stars"][j]["id"] +
+        '">' +
+        resultData[i]["stars"][j]["name"] +
+        " " +
+        "</a>";
     }
-    $(".cart-button").click(function () {
-        // Access the "data-movie-title" attribute of the clicked button
-        var movieTitle = $(this).data("movie-title");
+    rowHTML += "</th>";
+    rowHTML += "<th>" + resultData[i]["rating"] + "</th>";
+    rowHTML +=
+      "<th><button class='cart-button' data-movie-title='" +
+      resultData[i]["movie_Title"] +
+      "'>Add to Cart</button>";
+    rowHTML += "</th>";
+    rowHTML += "</tr>";
+    movieTableBodyElement.append(rowHTML);
 
-        // Do something with the movieTitle, e.g., add it to the cart
-        console.log("Movie Title: " + movieTitle);
-        // make a ajax request to send the data
-        var data = {
-            movieName: movieTitle,
-            quantity: 1,
-            cost: 30,
-            remove: "No",
-        };
+    // Append the row created to the table body, which will refresh the page
+  }
+  $(".cart-button").click(function () {
+    // Access the "data-movie-title" attribute of the clicked button
+    var movieTitle = $(this).data("movie-title");
 
-        console.log("data looks like: ", data);
+    // Do something with the movieTitle, e.g., add it to the cart
+    console.log("Movie Title: " + movieTitle);
+    // make a ajax request to send the data
+    var data = {
+      movieName: movieTitle,
+      quantity: 1,
+      cost: 30,
+      remove: "No",
+    };
 
-        $.ajax({
-            type: "POST",
-            url: "api/cart",
-            data: data,
-            success: function (response) {
-                console.log("Data sent to CartServlet successfully:", response);
-                alert("Item successfully added!");
+    console.log("data looks like: ", data);
+
+    $.ajax({
+      type: "POST",
+      url: "api/cart",
+      data: data,
+      success: function (response) {
+        console.log("Data sent to CartServlet successfully:", response);
+        alert("Item successfully added!");
       },
       error: function (err) {
         console.error("Error while sending data to CartServlet:", err);
         alert("Could not add to the shopping cart.");
-
       },
     });
   });
@@ -264,6 +263,8 @@ function populate_table(
   let director = getParameterByName("director");
   let starName = getParameterByName("star_name");
   let search = getParameterByName("search");
+  let fullTextSearch = getParameterByName("full_text_search");
+  let query = getParameterByName("query");
   let order = order_val
     ? order_val
     : getParameterByName("order")
@@ -271,7 +272,24 @@ function populate_table(
     : "RATING_DESC_TABLES_DESC";
   page_number_val = page_number;
   // Check if necessary parameters are present and make AJAX requests conditionally
-  if (genreID !== null && page_size !== null && page_number !== null) {
+  page_number_val = page_number;
+
+  if (fullTextSearch) {
+    jQuery.ajax({
+      dataType: "json", // Setting return data type
+      method: "GET", // Setting request method
+      url:
+        "api/full-text-search?query=" +
+        query +
+        "&page_number=" +
+        page_number +
+        "&page_size=" +
+        page_size +
+        "&order=" +
+        order,
+      success: (resultData) => handleResult(resultData),
+    });
+  } else if (genreID !== null && page_size !== null && page_number !== null) {
     console.log(genreID, page_size, page_number);
     jQuery.ajax({
       dataType: "json", // Setting return data type
@@ -287,8 +305,11 @@ function populate_table(
         order,
       success: (resultData) => handleResult(resultData),
     });
-  }
-  if (nameStartsWith !== null && page_size !== null && page_number !== null) {
+  } else if (
+    nameStartsWith !== null &&
+    page_size !== null &&
+    page_number !== null
+  ) {
     console.log(nameStartsWith, page_size, page_number);
 
     jQuery.ajax({
@@ -305,8 +326,7 @@ function populate_table(
         order,
       success: (resultData) => handleResult(resultData),
     });
-  }
-  if (search) {
+  } else if (search) {
     console.log(title, year, director, starName, page_size, page_number);
     if (page_number === null) {
       page_number = 1;
@@ -334,8 +354,7 @@ function populate_table(
         order,
       success: (resultData) => handleResult(resultData),
     });
-  }
-  if (!search && !nameStartsWith && !genreID) {
+  } else if (!search && !nameStartsWith && !genreID) {
     jQuery.ajax({
       dataType: "json", // Setting return data type
       method: "GET", // Setting request method
