@@ -582,6 +582,8 @@ public class MovieListServlet extends HttpServlet {
 //                handleMovieList(request, response);
                 if (request.getParameter("query") != null) {
                     System.out.println("query was : " + request.getParameter("query"));
+                    System.out.println("page number was: " + request.getParameter("page"));
+                    System.out.println("page size was: " + request.getParameter("pageSize"));
                     handleMovieListWithQuery(request, response);
                 } else {
                     handleMovieList(request, response);
@@ -606,26 +608,17 @@ public class MovieListServlet extends HttpServlet {
 
     }
     protected void handleMovieListWithQuery(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-
-        // Retrieve parameters from the URL request.
         String queryTitle = request.getParameter("query");
-        String page_number = request.getParameter("page_number");
-        String page_size = request.getParameter("page_size");
-
+        String page_number = request.getParameter("page");
+        String page_size = request.getParameter("pageSize");
         queryTitle = isNullOrEmpty(queryTitle) ? "!" : queryTitle;
         page_number = isNullOrEmpty(page_number) ? "1" : page_number;
         page_size = isNullOrEmpty(page_size) ? "25" : page_size;
-
-//        Object[] params = {queryTitle, "%" + queryTitle + "%", (Integer.parseInt(page_number) - 1) * Integer.parseInt(page_size), Integer.parseInt(page_size)};
-
-//        Object[] params = new Object[]{queryTitle, "%" + queryTitle + "%"};
+//        System.out.println("the curious number result: " + ((Integer.parseInt(page_number)Vj - 1) * Integer.parseInt(page_size)));
+//        System.out.println("page number here is: " + page_number);
+//        Object[] params = new Object[]{queryTitle, "%" + queryTitle + "%", (Integer.parseInt(page_number) - 1) * Integer.parseInt(page_size), Integer.parseInt(page_size)};
         Object[] params = new Object[]{queryTitle, "%" + queryTitle + "%", (Integer.parseInt(page_number) - 1) * Integer.parseInt(page_size), Integer.parseInt(page_size)};
-
-
-        // The log message can be found in localhost log
         request.getServletContext().log("searching for movies with title: " + queryTitle);
-
         String query = "SELECT\n" +
                 "    sub.MovieId,\n" +
                 "    sub.MovieTitle,\n" +
@@ -668,12 +661,6 @@ public class MovieListServlet extends HttpServlet {
                 "    ) AS sub\n" +
                 "LEFT JOIN ratings r ON sub.MovieId = r.movieId\n" +
                 "LIMIT ?, ?;\n";
-
-
-
-
         sendResponse(request, response, query, params);
     }
-
-
 }

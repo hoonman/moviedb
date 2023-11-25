@@ -47,8 +47,6 @@ public class LoginServlet extends HttpServlet {
         String password = request.getParameter("password");
 
         // encrypt password here and authenticate
-        PasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
-        String encryptedPassword = passwordEncryptor.encryptPassword(password);
 
         HttpSession session = request.getSession();
 
@@ -82,16 +80,16 @@ public class LoginServlet extends HttpServlet {
             while (rs.next()) {
                 valid_email = true;
                 String sql_password = rs.getString("password");
-//                correct_password = password.equals(sql_password);
-                AES256TextEncryptor textEncryptor = new AES256TextEncryptor();
-                textEncryptor.setPassword(sql_password);
-                String myEncryptedText = textEncryptor.encrypt(sql_password);
-                String decryptedPassword = textEncryptor.decrypt(myEncryptedText);
-                correct_password = decryptedPassword.equals(sql_password);
-                System.out.println("correct password: " + correct_password);
+                System.out.println("sql password here: " + sql_password);
 
-                System.out.println("decrypted password: " + decryptedPassword);
-                System.out.println("password from sql: " + sql_password);
+                PasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
+                String decryptedUser = passwordEncryptor.encryptPassword(password);
+
+                System.out.println("sql pass after: " + decryptedUser);
+
+
+//                correct_password = decryptedUser.equals(sql_password);
+                correct_password = passwordEncryptor.checkPassword(password, sql_password);
             }
             rs.close();
             statement.close();
