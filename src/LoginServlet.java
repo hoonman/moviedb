@@ -14,6 +14,8 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+
+import jakarta.servlet.http.HttpSession;
 import org.jasypt.util.password.PasswordEncryptor;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.jasypt.util.text.AES256TextEncryptor;
@@ -34,6 +36,10 @@ public class LoginServlet extends HttpServlet {
         }
     }
 
+//    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+//
+//    }
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         // recaptcha code begins here
@@ -43,6 +49,8 @@ public class LoginServlet extends HttpServlet {
         // encrypt password here and authenticate
         PasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
         String encryptedPassword = passwordEncryptor.encryptPassword(password);
+
+        HttpSession session = request.getSession();
 
 
         /* This example only allows username/password to be test/test
@@ -80,6 +88,7 @@ public class LoginServlet extends HttpServlet {
                 String myEncryptedText = textEncryptor.encrypt(sql_password);
                 String decryptedPassword = textEncryptor.decrypt(myEncryptedText);
                 correct_password = decryptedPassword.equals(sql_password);
+                System.out.println("correct password: " + correct_password);
 
                 System.out.println("decrypted password: " + decryptedPassword);
                 System.out.println("password from sql: " + sql_password);
@@ -103,7 +112,7 @@ public class LoginServlet extends HttpServlet {
                 responseJsonObject.addProperty("reCaptchaMessage", "reCaptcha has failed");
 
             }
-            if (valid_email && correct_password && captchaSuccess) {
+            if (valid_email && correct_password) {
                 // Login success:
 
                 // set this user into the session

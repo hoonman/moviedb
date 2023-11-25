@@ -262,6 +262,7 @@ public class MovieListServlet extends HttpServlet {
 
     }
     protected void handleSearchRequest(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        System.out.println("search request called:");
         String order = request.getParameter("order");
         if(order == null){
             order = "RATING_DESC_TABLES_DESC";
@@ -505,7 +506,13 @@ public class MovieListServlet extends HttpServlet {
                 handleCharacterRequest(request, response);
                 break;
             case "/api/movie-list":
-                handleMovieList(request, response);
+//                handleMovieList(request, response);
+                if (request.getParameter("query") != null) {
+                    System.out.println("query was : " + request.getParameter("query"));
+                    handleMovieListWithQuery(request, response);
+                } else {
+                    handleMovieList(request, response);
+                }
                 break;
             case "/api/search-movies":
                 handleSearchRequest(request,response);
@@ -516,5 +523,75 @@ public class MovieListServlet extends HttpServlet {
         }
 
     }
+    protected void handleMovieListWithQuery(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+
+        // Retrieve parameters from the URL request.
+        String queryTitle = request.getParameter("query");
+        String page_number = request.getParameter("page_number");
+        String page_size = request.getParameter("page_size");
+
+        queryTitle = isNullOrEmpty(queryTitle) ? "!" : queryTitle;
+        page_number = isNullOrEmpty(page_number) ? "1" : page_number;
+        page_size = isNullOrEmpty(page_size) ? "25" : page_size;
+
+//        Object[] params = {queryTitle, "%" + queryTitle + "%", (Integer.parseInt(page_number) - 1) * Integer.parseInt(page_size), Integer.parseInt(page_size)};
+
+//        Object[] params = new Object[]{queryTitle, "%" + queryTitle + "%"};
+        Object[] params = new Object[]{queryTitle, "%" + queryTitle + "%", (Integer.parseInt(page_number) - 1) * Integer.parseInt(page_size), Integer.parseInt(page_size)};
+
+
+        // The log message can be found in localhost log
+        request.getServletContext().log("searching for movies with title: " + queryTitle);
+
+        String query = "SELECT\n" +
+                "    sub.MovieId,\n" +
+                "    sub.MovieTitle,\n" +
+                "    sub.MovieYear,\n" +
+                "    sub.Director,\n" +
+                "    sub.Genres,\n" +
+                "    sub.Stars,\n" +
+                "    r.rating AS Rating\n" +
+                "FROM\n" +
+                "    (\n" +
+                "        SELECT\n" +
+                "            m.id AS MovieId,\n" +
+                "            m.title AS MovieTitle,\n" +
+                "            m.year AS MovieYear,\n" +
+                "            m.director AS Director,\n" +
+                "            (\n" +
+                "                SELECT GROUP_CONCAT(CONCAT(g.name, '|', g.id))\n" +
+                "                FROM genres_in_movies gim\n" +
+                "                JOIN genres g ON gim.genreId = g.id\n" +
+                "                WHERE gim.movieId = m.id\n" +
+                "                LIMIT 3\n" +
+                "            ) AS Genres,\n" +
+                "            (\n" +
+                "                SELECT GROUP_CONCAT(CONCAT(names, '|', ids))\n" +
+                "                FROM (\n" +
+                "                    SELECT s.name AS names, s.id AS ids, COUNT(sim2.starId) AS movie_count\n" +
+                "                    FROM stars AS s\n" +
+                "                    INNER JOIN stars_in_movies AS sim1 ON s.id = sim1.starId\n" +
+                "                    INNER JOIN stars_in_movies AS sim2 ON sim1.starId = sim2.starId\n" +
+                "                    WHERE sim1.movieId = m.id\n" +
+                "                    GROUP BY s.name, s.id\n" +
+                "                    ORDER BY movie_count DESC, names ASC\n" +
+                "                    LIMIT 3\n" +
+                "                ) AS SubStars\n" +
+                "            ) AS Stars\n" +
+                "        FROM\n" +
+                "            movies m\n" +
+                "        WHERE\n" +
+                "            (? = '!' OR m.title LIKE ?)\n" +
+                "    ) AS sub\n" +
+                "LEFT JOIN ratings r ON sub.MovieId = r.movieId\n" +
+                "LIMIT ?, ?;\n";
+
+
+
+
+        sendResponse(request, response, query, params);
+    }
+
 
 }
