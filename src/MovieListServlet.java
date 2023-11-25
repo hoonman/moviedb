@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-@WebServlet(name = "MovieListServlet", urlPatterns = {"/api/movie-list", "/api/genre_selection_list", "/api/first-character",  "/api/search-movies"})
+@WebServlet(name = "MovieListServlet", urlPatterns = {"/api/movie-list", "/api/genre_selection_list", "/api/first-character", "/api/search-movies","/api/full-text-search" })
 public class MovieListServlet extends HttpServlet {
     private static final long serialVersionUID = 3L;
 
@@ -328,9 +328,9 @@ public class MovieListServlet extends HttpServlet {
                 "        FROM\n" +
                 "            movies m\n" +
                 "        WHERE " +
-                "           (? = \'!\' OR m.director LIKE ?)\n" +
+                "           (? = '!' OR m.director LIKE ?)\n" +
                 "           AND (? = -1 OR m.year = ?)\n" +
-                "           AND (? = \'!\'  OR m.title LIKE ?)\n" +
+                "           AND (? = '!'  OR m.title LIKE ?)\n" +
                 "    ) AS sub\n" +
                 "LEFT JOIN ratings r ON sub.MovieId = r.movieId\n" +
                 "WHERE\n" +
@@ -417,8 +417,6 @@ public class MovieListServlet extends HttpServlet {
                 "    ) AS sub\n" +
                 "LEFT JOIN ratings r ON sub.MovieId = r.movieId\n";
         query += constructSortQuery(order);
-//                "ORDER BY r.rating DESC, sub.MovieTitle ASC\n";
-
         query += "LIMIT ?,?;\n";
 
 
@@ -488,6 +486,82 @@ public class MovieListServlet extends HttpServlet {
 
         sendResponse(request,response,query,params);
     }
+    private String buildFullTextSearchMoviesQuery(String query){
+        String[] prefixList = query.split(" ");
+        StringBuilder sqlQuery = new StringBuilder();
+        for(String prefix: prefixList){
+            sqlQuery.append("+").append(prefix).append("*");
+        }
+        return sqlQuery.toString();
+    }
+    protected void handleFullTextSearch(HttpServletRequest request, HttpServletResponse response, String searchParams) throws IOException{
+        String order = request.getParameter("order");
+        if(order == null){
+            order = "RATING_DESC_TABLES_DESC";
+        }
+
+        String searchQueries = buildFullTextSearchMoviesQuery(searchParams);
+
+        String query = "SELECT\n" +
+                "    sub.MovieId,\n" +
+                "    sub.MovieTitle,\n" +
+                "    sub.MovieYear,\n" +
+                "    sub.Director,\n" +
+                "    sub.Genres,\n" +
+                "    sub.Stars,\n" +
+                "    r.rating AS Rating\n" +
+                "FROM\n" +
+                "    (\n" +
+                "        SELECT\n" +
+                "            m.id AS MovieId,\n" +
+                "            m.title AS MovieTitle,\n" +
+                "            m.year AS MovieYear,\n" +
+                "            m.director AS Director,\n" +
+                "            (\n" +
+                "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids))\n" +
+                "                FROM\n" +
+                "                    (\n" +
+                "                        SELECT DISTINCT g.name AS names, g.id AS ids\n" +
+                "                        FROM genres_in_movies gim\n" +
+                "                        JOIN genres g ON gim.genreId = g.id\n" +
+                "                        WHERE gim.movieId = m.id\n" +
+                "                        LIMIT 3\n" +
+                "                    ) AS SubGenres\n" +
+                "            ) AS Genres,\n" +
+                "            (\n" +
+                "                SELECT GROUP_CONCAT(CONCAT(names, \"|\", ids))\n" +
+                "                FROM\n" +
+                "                    (\n" +
+                "                    SELECT s.name AS names, s.id as ids, COUNT(sim2.starId) AS movie_count\n" +
+                "                    FROM stars AS s\n" +
+                "                    INNER JOIN stars_in_movies AS sim1 ON s.id = sim1.starId\n" +
+                "                    INNER JOIN stars_in_movies AS sim2 ON sim1.starId = sim2.starId\n" +
+                "                    WHERE sim1.movieId = m.id\n" +
+                "                    GROUP BY s.name, s.id\n" +
+                "                    ORDER BY movie_count DESC , names ASC\n" +
+                "                    LIMIT 3\n" +
+                "                    ) AS SubStars\n" +
+                "            ) AS Stars\n" +
+                "        FROM\n" +
+                "            movies m\n" +
+                "        WHERE " +
+                "           MATCH(title) AGAINST (? IN BOOLEAN MODE)\n"+
+                "    ) AS sub\n" +
+                "LEFT JOIN ratings r ON sub.MovieId = r.movieId\n";
+        query += constructSortQuery(order);
+
+        query += "LIMIT ?,?;\n";
+
+        String page_number = request.getParameter("page_number");
+        String page_size = request.getParameter("page_size");
+
+        page_number = isNullOrEmpty(page_number)? "1" :  page_number;
+        page_size = isNullOrEmpty(page_size)? "25" :  page_size;
+
+        Object[] params = {  searchQueries, (Integer.parseInt(page_number)-1) * Integer.parseInt(page_size), Integer.parseInt(page_size)};
+
+        sendResponse(request,response,query,params);
+    }
     /**
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
      * response)
@@ -496,7 +570,6 @@ public class MovieListServlet extends HttpServlet {
         String pathInfo = request.getServletPath();
         response.setContentType("application/json"); // Response mime type
                   // Construct a query with parameter represented by "?"
-
 
         switch (pathInfo) {
             case "/api/genre_selection_list":
@@ -516,6 +589,15 @@ public class MovieListServlet extends HttpServlet {
                 break;
             case "/api/search-movies":
                 handleSearchRequest(request,response);
+                break;
+            case "/api/full-text-search":
+                String searchParams = request.getParameter("query");
+                JsonArray jsonArray = new JsonArray();
+                // return the empty json array if query is null or empty
+                if (searchParams == null || searchParams.trim().isEmpty()) {
+                    response.getWriter().write(jsonArray.toString());
+                    return;                }
+                handleFullTextSearch(request,response, searchParams);
                 break;
             default:
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
