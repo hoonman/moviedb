@@ -124,8 +124,6 @@ public class CartServlet extends HttpServlet {
             }
         }
         responseJsonObject.add("previousItems", previousItemsJsonArray);
-
-
         response.getWriter().write(responseJsonObject.toString());
 
 
