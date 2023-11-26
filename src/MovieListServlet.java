@@ -262,7 +262,6 @@ public class MovieListServlet extends HttpServlet {
 
     }
     protected void handleSearchRequest(HttpServletRequest request, HttpServletResponse response) throws IOException{
-        System.out.println("search request called:");
         String order = request.getParameter("order");
         if(order == null){
             order = "RATING_DESC_TABLES_DESC";
@@ -363,7 +362,6 @@ public class MovieListServlet extends HttpServlet {
         String page_size = request.getParameter("page_size");
         page_number = isNullOrEmpty(page_number)? "1" :  page_number;
         page_size = isNullOrEmpty(page_size)? "25" :  page_size;
-        System.out.println("Calling Genre Browse");
         Object[] params = { Integer.parseInt(genreID), (Integer.parseInt(page_number)-1) * Integer.parseInt(page_size), Integer.parseInt(page_size)};
         // The log message can be found in localhost log
         request.getServletContext().log("getting genreID: " + genreID);
@@ -581,9 +579,6 @@ public class MovieListServlet extends HttpServlet {
             case "/api/movie-list":
 //                handleMovieList(request, response);
                 if (request.getParameter("query") != null) {
-                    System.out.println("query was : " + request.getParameter("query"));
-                    System.out.println("page number was: " + request.getParameter("page"));
-                    System.out.println("page size was: " + request.getParameter("pageSize"));
                     handleMovieListWithQuery(request, response);
                 } else {
                     handleMovieList(request, response);
@@ -609,15 +604,13 @@ public class MovieListServlet extends HttpServlet {
     }
     protected void handleMovieListWithQuery(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String queryTitle = request.getParameter("query");
+        queryTitle = buildFullTextSearchMoviesQuery(queryTitle);
         String page_number = request.getParameter("page");
         String page_size = request.getParameter("pageSize");
         queryTitle = isNullOrEmpty(queryTitle) ? "!" : queryTitle;
         page_number = isNullOrEmpty(page_number) ? "1" : page_number;
-        page_size = isNullOrEmpty(page_size) ? "25" : page_size;
-//        System.out.println("the curious number result: " + ((Integer.parseInt(page_number)Vj - 1) * Integer.parseInt(page_size)));
-//        System.out.println("page number here is: " + page_number);
-//        Object[] params = new Object[]{queryTitle, "%" + queryTitle + "%", (Integer.parseInt(page_number) - 1) * Integer.parseInt(page_size), Integer.parseInt(page_size)};
-        Object[] params = new Object[]{queryTitle, "%" + queryTitle + "%", (Integer.parseInt(page_number) - 1) * Integer.parseInt(page_size), Integer.parseInt(page_size)};
+        page_size = isNullOrEmpty(page_size) ? "10" : page_size;
+        Object[] params = new Object[]{queryTitle, (Integer.parseInt(page_number) - 1) * Integer.parseInt(page_size), Integer.parseInt(page_size)};
         request.getServletContext().log("searching for movies with title: " + queryTitle);
         String query = "SELECT\n" +
                 "    sub.MovieId,\n" +
@@ -656,8 +649,8 @@ public class MovieListServlet extends HttpServlet {
                 "            ) AS Stars\n" +
                 "        FROM\n" +
                 "            movies m\n" +
-                "        WHERE\n" +
-                "            (? = '!' OR m.title LIKE ?)\n" +
+                "        WHERE " +
+                "           MATCH(title) AGAINST (? IN BOOLEAN MODE)\n"+
                 "    ) AS sub\n" +
                 "LEFT JOIN ratings r ON sub.MovieId = r.movieId\n" +
                 "LIMIT ?, ?;\n";
