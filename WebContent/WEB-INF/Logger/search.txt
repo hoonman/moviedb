@@ -1,0 +1,6 @@
+JDBC time:19136959, Search Servlet time:22942375
+JDBC time:7960958, Search Servlet time:8753000
+JDBC time:39066208, Search Servlet time:39448041
+JDBC time:15670000, Search Servlet time:17200667
+JDBC time:28199875, Search Servlet time:29301375
+JDBC time:14147833, Search Servlet time:14971292

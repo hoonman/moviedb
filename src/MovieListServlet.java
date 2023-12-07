@@ -4,11 +4,14 @@ import com.google.gson.JsonObject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -22,16 +25,51 @@ import java.util.Objects;
 @WebServlet(name = "MovieListServlet", urlPatterns = {"/api/movie-list", "/api/genre_selection_list", "/api/first-character", "/api/search-movies","/api/full-text-search" })
 public class MovieListServlet extends HttpServlet {
     private static final long serialVersionUID = 3L;
-
+    private long startTime = 0;
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
 
-    public void init(ServletConfig config) {
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
         try {
             dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
         } catch (NamingException e) {
             e.printStackTrace();
         }
+    }
+
+    private void logTime(boolean isJDBC, long time) throws IOException {
+        String realPath = getServletContext().getRealPath("/WEB-INF/Logger");//        String contextPath = getServletContext().getRealPath("/WEB-INF/Logger");
+        String logDir = "/path/to/log/directory";
+        File directory = new File(logDir);
+        if (!directory.exists()) {
+            directory.mkdirs(); // Create the directory if it doesn't exist
+        }
+        // Find the next available file name
+        String baseFileName = "search";
+        String fileExtension = ".txt";
+        File file;
+        int fileIndex = 0;
+
+        do {
+            String fileName = baseFileName + (fileIndex == 0 ? "" : fileIndex) + fileExtension;
+            file = new File(logDir, fileName);
+            fileIndex++;
+        } while (file.exists());
+
+
+        // Using try-with-resources to ensure the writer is closed properly
+        try (FileWriter writer = new FileWriter(file, true)) { // 'true' to append to the file
+            if(isJDBC){
+                writer.write("JDBC time:"+ time +  ", " ); // Write the parameter with a new line
+            }else{
+                writer.write("Search Servlet time:" + time +System.lineSeparator()); // Write the parameter with a new line
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle any I/O exceptions here
+        }
+
     }
 
     private String constructSortQuery(String sortField) {
@@ -67,6 +105,7 @@ public class MovieListServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         // Get a connection from dataSource and let resource manager close the connection after usage.
+        long startJDBCTime = System.nanoTime();
         try (Connection conn = dataSource.getConnection()) {
             // Get a connection from dataSource
             PreparedStatement statement = conn.prepareStatement(query);
@@ -165,6 +204,9 @@ public class MovieListServlet extends HttpServlet {
             response.setStatus(500);
         } finally {
             out.close();
+            long endTime = System.nanoTime();
+            long elapsedTime = endTime - startJDBCTime; // elapsed time in nano seconds. Note: print the values in nanoseconds
+            logTime(true, elapsedTime);
         }
         // Always remember to close db connection after usage. Here it's done by try-with-resources
 
@@ -565,7 +607,9 @@ public class MovieListServlet extends HttpServlet {
      * response)
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        startTime = System.nanoTime();
         String pathInfo = request.getServletPath();
+
         response.setContentType("application/json"); // Response mime type
                   // Construct a query with parameter represented by "?"
 
@@ -595,6 +639,9 @@ public class MovieListServlet extends HttpServlet {
                     response.getWriter().write(jsonArray.toString());
                     return;                }
                 handleFullTextSearch(request,response, searchParams);
+                long endTime = System.nanoTime();
+                long elapsedTime = endTime - startTime; // elapsed time in nano seconds. Note: print the values in nanoseconds
+                logTime(false, elapsedTime);
                 break;
             default:
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
