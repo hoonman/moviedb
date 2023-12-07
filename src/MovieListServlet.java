@@ -26,6 +26,8 @@ import java.util.Objects;
 public class MovieListServlet extends HttpServlet {
     private static final long serialVersionUID = 3L;
     private long startTime = 0;
+    private String logFileName = null;
+
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
 
@@ -39,27 +41,29 @@ public class MovieListServlet extends HttpServlet {
     }
 
     private void logTime(boolean isJDBC, long time) throws IOException {
-        String realPath = getServletContext().getRealPath("/WEB-INF/Logger");//        String contextPath = getServletContext().getRealPath("/WEB-INF/Logger");
-        String logDir = "/path/to/log/directory";
-        File directory = new File(logDir);
-        if (!directory.exists()) {
-            directory.mkdirs(); // Create the directory if it doesn't exist
+//        String realPath = getServletContext().getRealPath("/WEB-INF/Logger");//        String contextPath = getServletContext().getRealPath("/WEB-INF/Logger");
+        if (logFileName == null) {
+            String logDir = "/Users/jasonwong/Documents/School/CS122b/fabflix/WebContent/WEB-INF/Logger";
+            File directory = new File(logDir);
+            if (!directory.exists()) {
+                directory.mkdirs(); // Create the directory if it doesn't exist
+            }
+            // Find the next available file name
+            String baseFileName = "search";
+            String fileExtension = ".txt";
+            File file;
+            int fileIndex = 0;
+
+            do {
+                String fileName = baseFileName + (fileIndex == 0 ? "" : fileIndex) + fileExtension;
+                file = new File(logDir, fileName);
+                fileIndex++;
+            } while (file.exists());
+            logFileName = file.getPath();
         }
-        // Find the next available file name
-        String baseFileName = "search";
-        String fileExtension = ".txt";
-        File file;
-        int fileIndex = 0;
-
-        do {
-            String fileName = baseFileName + (fileIndex == 0 ? "" : fileIndex) + fileExtension;
-            file = new File(logDir, fileName);
-            fileIndex++;
-        } while (file.exists());
-
 
         // Using try-with-resources to ensure the writer is closed properly
-        try (FileWriter writer = new FileWriter(file, true)) { // 'true' to append to the file
+        try (FileWriter writer = new FileWriter(logFileName, true)) { // 'true' to append to the file
             if(isJDBC){
                 writer.write("JDBC time:"+ time +  ", " ); // Write the parameter with a new line
             }else{
