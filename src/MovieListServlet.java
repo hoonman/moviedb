@@ -41,30 +41,40 @@ public class MovieListServlet extends HttpServlet {
     }
 
     private synchronized void logTime(boolean isJDBC, long time) throws IOException {
-//        String realPath = getServletContext().getRealPath("/WEB-INF/Logger");//        String contextPath = getServletContext().getRealPath("/WEB-INF/Logger");
-        String logDir = "/home/ubuntu/Logger";
-        String logFileName = "log.txt"; // Fixed log file name
+        if (logFileName == null) {
+                String logDir =  getServletContext().getRealPath("/");
+                File directory = new File(logDir);
 
-        File directory = new File(logDir);
-        File logFile = new File(directory, logFileName);
+                System.out.println("full directory: " + logDir);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+                String baseFileName = "search";
+                String fileExtension = ".txt";
+                File file;
+                int fileIndex = 0;
 
-        // Using try-with-resources to ensure the writer is closed properly
-        try (FileWriter writer = new FileWriter(logFile, true)) { // 'true' to append to the file
-            if(isJDBC){
-                writer.write("JDBC time:"+ time +  ", " ); // Write the parameter with a new line
-            }else{
-                writer.write("Search Servlet time:" + time +System.lineSeparator()); // Write the parameter with a new line
+                do {
+                    String fileName = baseFileName + (fileIndex == 0 ? "" : fileIndex) + fileExtension;
+                    file = new File(logDir, fileName);
+                    fileIndex++;
+                } while (file.exists());
+                logFileName = file.getPath();
             }
-            System.out.println("file wrote: time"+ time);
+            try (FileWriter writer = new FileWriter(logFileName, true)) { // 'true' to append to the file
+                if(isJDBC){
+                    writer.write("JDBC time:"+ time +  ", " ); // Write the parameter with a new line
+                }else{
+                    writer.write("Search Servlet time:" + time +System.lineSeparator()); // Write the parameter with a new line
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                // Handle any I/O exceptions here
+            }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            // Handle any I/O exceptions here
+
+
         }
-
-
-
-    }
 
     private String constructSortQuery(String sortField) {
         StringBuilder sortQuery = new StringBuilder("ORDER BY ");
