@@ -43,7 +43,7 @@ public class MovieListServlet extends HttpServlet {
     private void logTime(boolean isJDBC, long time) throws IOException {
 //        String realPath = getServletContext().getRealPath("/WEB-INF/Logger");//        String contextPath = getServletContext().getRealPath("/WEB-INF/Logger");
         if (logFileName == null) {
-            String logDir = "/Users/jasonwong/Documents/School/CS122b/fabflix/WebContent/WEB-INF/Logger";
+            String logDir = "/home/ubuntu/Logger";
             File directory = new File(logDir);
             if (!directory.exists()) {
                 directory.mkdirs(); // Create the directory if it doesn't exist
