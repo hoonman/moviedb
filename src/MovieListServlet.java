@@ -41,33 +41,27 @@ public class MovieListServlet extends HttpServlet {
     }
 
     private void logTime(boolean isJDBC, long time) throws IOException {
-//        String realPath = getServletContext().getRealPath("/WEB-INF/Logger");//        String contextPath = getServletContext().getRealPath("/WEB-INF/Logger");
-        String logDir = "/home/ubuntu/Logger";
+        if (logFileName == null) {
+            String logDir =  getServletContext().getRealPath("/");
+            File directory = new File(logDir);
 
-        String logFileName = "log.txt"; // Fixed log file name
-
-        File directory2 = new File(logDir);
-        File logFile2 = new File(directory2, logFileName);
-
-        // Diagnostic information
-        System.out.println("logDir: " + logDir);
-        System.out.println("logFile: " + logFile2.getAbsolutePath());
-        try (FileWriter writer = new FileWriter(logFile2, true)) {
-            if (isJDBC) {
-                writer.write("JDBC time:" + time + ", ");
-            } else {
-                writer.write("Search Servlet time:" + time + System.lineSeparator());
+            System.out.println("full directory: " + logDir);
+            if (!directory.exists()) {
+                directory.mkdirs();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error writing to log file: " + e.getMessage());
+            String baseFileName = "search";
+            String fileExtension = ".txt";
+            File file;
+            int fileIndex = 0;
+
+            do {
+                String fileName = baseFileName + (fileIndex == 0 ? "" : fileIndex) + fileExtension;
+                file = new File(logDir, fileName);
+                fileIndex++;
+            } while (file.exists());
+            logFileName = file.getPath();
         }
-
-        File directory = new File(logDir);
-        File logFile = new File(directory, logFileName);
-
-        // Using try-with-resources to ensure the writer is closed properly
-        try (FileWriter writer = new FileWriter(logFile, true)) { // 'true' to append to the file
+        try (FileWriter writer = new FileWriter(logFileName, true)) { // 'true' to append to the file
             if(isJDBC){
                 writer.write("JDBC time:"+ time +  ", " ); // Write the parameter with a new line
             }else{
@@ -77,6 +71,8 @@ public class MovieListServlet extends HttpServlet {
             e.printStackTrace();
             // Handle any I/O exceptions here
         }
+
+
 
     }
 
