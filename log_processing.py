@@ -12,6 +12,7 @@ def get_averages(path: str):
             data_count +=1
     return jdbc_time/data_count, search_servlet_total/data_count
 if __name__ == "__main__":
-    avgs = get_averages("/Users/jasonwong/Documents/School/CS122b/fabflix/WebContent/WEB-INF/Logger/search.txt")
+    file_path = input('Log file:')
+    avgs = get_averages(file_path)
     print("JDBC average time is:", avgs[0])
     print("Servelt time is:", avgs[1])
