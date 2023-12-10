@@ -42,28 +42,15 @@ public class MovieListServlet extends HttpServlet {
 
     private void logTime(boolean isJDBC, long time) throws IOException {
 //        String realPath = getServletContext().getRealPath("/WEB-INF/Logger");//        String contextPath = getServletContext().getRealPath("/WEB-INF/Logger");
-        if (logFileName == null) {
-            String logDir = "/home/ubuntu/Logger";
-            File directory = new File(logDir);
-            if (!directory.exists()) {
-                directory.mkdirs(); // Create the directory if it doesn't exist
-            }
-            // Find the next available file name
-            String baseFileName = "search";
-            String fileExtension = ".txt";
-            File file;
-            int fileIndex = 0;
+        String logDir = "/Users/jasonwong/Documents/School/CS122b/logs";
+        String logFileName = "log.txt"; // Fixed log file name
 
-            do {
-                String fileName = baseFileName + (fileIndex == 0 ? "" : fileIndex) + fileExtension;
-                file = new File(logDir, fileName);
-                fileIndex++;
-            } while (file.exists());
-            logFileName = file.getPath();
-        }
+
+        File directory = new File(logDir);
+        File logFile = new File(directory, logFileName);
 
         // Using try-with-resources to ensure the writer is closed properly
-        try (FileWriter writer = new FileWriter(logFileName, true)) { // 'true' to append to the file
+        try (FileWriter writer = new FileWriter(logFile, true)) { // 'true' to append to the file
             if(isJDBC){
                 writer.write("JDBC time:"+ time +  ", " ); // Write the parameter with a new line
             }else{
