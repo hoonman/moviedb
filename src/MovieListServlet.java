@@ -42,7 +42,7 @@ public class MovieListServlet extends HttpServlet {
 
     private void logTime(boolean isJDBC, long time) throws IOException {
 //        String realPath = getServletContext().getRealPath("/WEB-INF/Logger");//        String contextPath = getServletContext().getRealPath("/WEB-INF/Logger");
-        String logDir = "/Users/jasonwong/Documents/School/CS122b/logs";
+        String logDir = "/home/ubuntu/Logger";
         String logFileName = "log.txt"; // Fixed log file name
 
 
