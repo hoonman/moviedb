@@ -43,8 +43,25 @@ public class MovieListServlet extends HttpServlet {
     private void logTime(boolean isJDBC, long time) throws IOException {
 //        String realPath = getServletContext().getRealPath("/WEB-INF/Logger");//        String contextPath = getServletContext().getRealPath("/WEB-INF/Logger");
         String logDir = "/home/ubuntu/Logger";
+
         String logFileName = "log.txt"; // Fixed log file name
 
+        File directory2 = new File(logDir);
+        File logFile2 = new File(directory2, logFileName);
+
+        // Diagnostic information
+        System.out.println("logDir: " + logDir);
+        System.out.println("logFile: " + logFile2.getAbsolutePath());
+        try (FileWriter writer = new FileWriter(logFile2, true)) {
+            if (isJDBC) {
+                writer.write("JDBC time:" + time + ", ");
+            } else {
+                writer.write("Search Servlet time:" + time + System.lineSeparator());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Error writing to log file: " + e.getMessage());
+        }
 
         File directory = new File(logDir);
         File logFile = new File(directory, logFileName);
