@@ -15,12 +15,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 
 @WebServlet(name = "MovieListServlet", urlPatterns = {"/api/movie-list", "/api/genre_selection_list", "/api/first-character", "/api/search-movies","/api/full-text-search" })
 public class MovieListServlet extends HttpServlet {
@@ -31,47 +33,52 @@ public class MovieListServlet extends HttpServlet {
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
 
+    // Atomic variables for thread safety
+    private AtomicLong jdbcTime = new AtomicLong(0);
+    private AtomicLong servletTime = new AtomicLong(0);
+
+    String url="jdbc:mysql://localhost:3306/moviedb";
+    String user = "mytestuser"; // Replace with your username
+    String password = "My6$Password"; // Replace with your password
+
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        try {
-            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
-        } catch (NamingException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
+//        } catch (NamingException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private synchronized void logTime(boolean isJDBC, long time) throws IOException {
         if (logFileName == null) {
-                String logDir =  getServletContext().getRealPath("/");
-                File directory = new File(logDir);
+            String logDir =  getServletContext().getRealPath("/");
+            File directory = new File(logDir);
 
-                System.out.println("full directory: " + logDir);
-                if (!directory.exists()) {
-                    directory.mkdirs();
-                }
-                String baseFileName = "search";
-                String fileExtension = ".txt";
-                File file;
-                int fileIndex = 0;
-
-                do {
-                    String fileName = baseFileName + (fileIndex == 0 ? "" : fileIndex) + fileExtension;
-                    file = new File(logDir, fileName);
-                    fileIndex++;
-                } while (file.exists());
-                logFileName = file.getPath();
+            System.out.println("full directory: " + logDir);
+            if (!directory.exists()) {
+                directory.mkdirs();
             }
-            try (FileWriter writer = new FileWriter(logFileName, true)) { // 'true' to append to the file
-                if(isJDBC){
-                    writer.write("JDBC time:"+ time +  ", " ); // Write the parameter with a new line
-                }else{
-                    writer.write("Search Servlet time:" + time +System.lineSeparator()); // Write the parameter with a new line
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                // Handle any I/O exceptions here
-            }
+            String baseFileName = "search";
+            String fileExtension = ".txt";
+            File file;
+            int fileIndex = 0;
 
+            do {
+                String fileName = baseFileName + (fileIndex == 0 ? "" : fileIndex) + fileExtension;
+                file = new File(logDir, fileName);
+                fileIndex++;
+            } while (file.exists());
+            logFileName = file.getPath();
+        }
+        try (FileWriter writer = new FileWriter(logFileName, true)) {
+            writer.write("JDBC time: " + jdbcTime.get() + ", Servlet time: " + servletTime.get() + System.lineSeparator());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // Reset the times after logging
+        jdbcTime.set(0);
+        servletTime.set(0);
 
 
         }
@@ -110,7 +117,9 @@ public class MovieListServlet extends HttpServlet {
 
         // Get a connection from dataSource and let resource manager close the connection after usage.
         long startJDBCTime = System.nanoTime();
-        try (Connection conn = dataSource.getConnection()) {
+//        try (Connection conn = dataSource.getConnection()) {
+        try(Connection conn = DriverManager.getConnection(url, user, password)){
+
             // Get a connection from dataSource
             PreparedStatement statement = conn.prepareStatement(query);
             // Set parameter values based on their types
@@ -210,6 +219,7 @@ public class MovieListServlet extends HttpServlet {
             out.close();
             long endTime = System.nanoTime();
             long elapsedTime = endTime - startJDBCTime; // elapsed time in nano seconds. Note: print the values in nanoseconds
+            servletTime.addAndGet(elapsedTime);
             logTime(true, elapsedTime);
         }
         // Always remember to close db connection after usage. Here it's done by try-with-resources
@@ -645,7 +655,8 @@ public class MovieListServlet extends HttpServlet {
                 handleFullTextSearch(request,response, searchParams);
                 long endTime = System.nanoTime();
                 long elapsedTime = endTime - startTime; // elapsed time in nano seconds. Note: print the values in nanoseconds
-                logTime(false, elapsedTime);
+//                logTime(false, elapsedTime);
+                jdbcTime.addAndGet(elapsedTime);
                 break;
             default:
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
