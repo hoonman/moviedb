@@ -37,8 +37,8 @@
 | Case 3: HTTPS/10 threads                       | ![](path to image in img/)                 | 727                        | 2.036079069812229303                                | 0.00022805                | ??           |
 | Case 4: HTTP/10 threads/No connection pooling  | ![](path to image in img/)                 | ??                         | ??                                | ??                        | ??           |
 
-| **Scaled Version Test Plan**                   | **Graph Results Screenshot** | **Average Query Time(ms)** | **Average Search Servlet Time(ms)** | **Average JDBC Time(ms)** | **Analysis** |
-|------------------------------------------------|------------------------------|----------------------------|-------------------------------------|---------------------------|--------------|
-| Case 1: HTTP/1 thread                          | ![](path to image in img/)   | ??                         | ??                                  | ??                        | ??           |
-| Case 2: HTTP/10 threads                        | ![](path to image in img/)   | ??                         | ??                                  | ??                        | ??           |
-| Case 3: HTTP/10 threads/No connection pooling  | ![](path to image in img/)   | ??                         | ??                                  | ??                        | ??           |
+| **Scaled Version Test Plan**                   | **Graph Results Screenshot**               | **Average Query Time(ms)** | **Average Search Servlet Time(ms)** | **Average JDBC Time(ms)** | **Analysis** |
+|------------------------------------------------|--------------------------------------------|----------------------------|-------------------------------------|---------------------------|--------------|
+| Case 1: HTTP/1 thread                          | ![](img/scaled-instance-http-1thread.png)  | 150                        | 1.960823869521410634                                  | 0.0008266                        | ??           |
+| Case 2: HTTP/10 threads                        | ![](img/scaled-instance-http-10thread.png) | 144                        | 2.2099638043900071693                                  | 0.00029919                       | ??           |
+| Case 3: HTTP/10 threads/No connection pooling  | ![](path to image in img/)                 | ??                         | ??                                  | ??                        | ??           |
