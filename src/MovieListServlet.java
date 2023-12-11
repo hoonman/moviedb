@@ -40,11 +40,11 @@ public class MovieListServlet extends HttpServlet {
 
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-//        try {
-//            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
-//        } catch (NamingException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
     }
 
     private void logTime(long jbdcTime, long servletTime) throws IOException {
@@ -75,7 +75,7 @@ public class MovieListServlet extends HttpServlet {
         }
 
 
-        }
+    }
 
     private String constructSortQuery(String sortField) {
         StringBuilder sortQuery = new StringBuilder("ORDER BY ");
@@ -111,8 +111,8 @@ public class MovieListServlet extends HttpServlet {
 
         // Get a connection from dataSource and let resource manager close the connection after usage.
         long startJDBCTime = System.nanoTime();
-//        try (Connection conn = dataSource.getConnection()) {
-        try(Connection conn = DriverManager.getConnection(url, user, password)){
+        try (Connection conn = dataSource.getConnection()) {
+//        try(Connection conn = DriverManager.getConnection(url, user, password)){
 
             // Get a connection from dataSource
             PreparedStatement statement = conn.prepareStatement(query);
