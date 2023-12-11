@@ -27,15 +27,12 @@ import java.util.concurrent.atomic.AtomicLong;
 @WebServlet(name = "MovieListServlet", urlPatterns = {"/api/movie-list", "/api/genre_selection_list", "/api/first-character", "/api/search-movies","/api/full-text-search" })
 public class MovieListServlet extends HttpServlet {
     private static final long serialVersionUID = 3L;
-    private long startTime = 0;
     private String logFileName = null;
 
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
 
     // Atomic variables for thread safety
-    private AtomicLong jdbcTime = new AtomicLong(0);
-    private AtomicLong servletTime = new AtomicLong(0);
 
     String url="jdbc:mysql://localhost:3306/moviedb";
     String user = "mytestuser"; // Replace with your username
@@ -50,7 +47,7 @@ public class MovieListServlet extends HttpServlet {
 //        }
     }
 
-    private synchronized void logTime(boolean isJDBC, long time) throws IOException {
+    private void logTime(long jbdcTime, long servletTime) throws IOException {
         if (logFileName == null) {
             String logDir =  getServletContext().getRealPath("/");
             File directory = new File(logDir);
@@ -72,13 +69,10 @@ public class MovieListServlet extends HttpServlet {
             logFileName = file.getPath();
         }
         try (FileWriter writer = new FileWriter(logFileName, true)) {
-            writer.write("JDBC time: " + jdbcTime.get() + ", Servlet time: " + servletTime.get() + System.lineSeparator());
+            writer.write("JDBC time: " + jbdcTime + ", Servlet time: " + servletTime + System.lineSeparator());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // Reset the times after logging
-        jdbcTime.set(0);
-        servletTime.set(0);
 
 
         }
@@ -111,7 +105,7 @@ public class MovieListServlet extends HttpServlet {
     private boolean isNullOrEmpty(String s) {
         return s == null || s.trim().isEmpty();
     }
-    protected void sendResponse(HttpServletRequest request, HttpServletResponse response, String query, Object[] params) throws IOException {
+    protected long sendResponse(HttpServletRequest request, HttpServletResponse response, String query, Object[] params) throws IOException {
         // Output stream to STDOUT
         PrintWriter out = response.getWriter();
 
@@ -218,9 +212,7 @@ public class MovieListServlet extends HttpServlet {
         } finally {
             out.close();
             long endTime = System.nanoTime();
-            long elapsedTime = endTime - startJDBCTime; // elapsed time in nano seconds. Note: print the values in nanoseconds
-            servletTime.addAndGet(elapsedTime);
-            logTime(true, elapsedTime);
+            return endTime - startJDBCTime;
         }
         // Always remember to close db connection after usage. Here it's done by try-with-resources
 
@@ -548,7 +540,7 @@ public class MovieListServlet extends HttpServlet {
         }
         return sqlQuery.toString();
     }
-    protected void handleFullTextSearch(HttpServletRequest request, HttpServletResponse response, String searchParams) throws IOException{
+    protected long handleFullTextSearch(HttpServletRequest request, HttpServletResponse response, String searchParams) throws IOException{
         String order = request.getParameter("order");
         if(order == null){
             order = "RATING_DESC_TABLES_DESC";
@@ -614,14 +606,14 @@ public class MovieListServlet extends HttpServlet {
 
         Object[] params = {  searchQueries, (Integer.parseInt(page_number)-1) * Integer.parseInt(page_size), Integer.parseInt(page_size)};
 
-        sendResponse(request,response,query,params);
+        return sendResponse(request,response,query,params);
     }
     /**
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
      * response)
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        startTime = System.nanoTime();
+        long startTime = System.nanoTime();
         String pathInfo = request.getServletPath();
 
         response.setContentType("application/json"); // Response mime type
@@ -652,11 +644,10 @@ public class MovieListServlet extends HttpServlet {
                 if (searchParams == null || searchParams.trim().isEmpty()) {
                     response.getWriter().write(jsonArray.toString());
                     return;                }
-                handleFullTextSearch(request,response, searchParams);
+                long jdbcTime = handleFullTextSearch(request,response, searchParams);
                 long endTime = System.nanoTime();
-                long elapsedTime = endTime - startTime; // elapsed time in nano seconds. Note: print the values in nanoseconds
-//                logTime(false, elapsedTime);
-                jdbcTime.addAndGet(elapsedTime);
+                long servletTime = endTime - startTime; // elapsed time in nano seconds. Note: print the values in nanoseconds
+                logTime(jdbcTime, servletTime);
                 break;
             default:
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
