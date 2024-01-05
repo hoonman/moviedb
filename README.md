@@ -1,4 +1,4 @@
-# CS 122B Team Ja # 
+# Moviedb Team Ja # 
 
 * Demo video URL of Project 1: https://www.youtube.com/watch?v=Tv-3f4Oi3nE
 * Demo video URL of Project 2: https://youtu.be/yCj33M3dh3I
